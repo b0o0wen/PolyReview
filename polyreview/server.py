@@ -88,9 +88,18 @@ def create_server(adapter, server_name: str | None = None) -> FastMCP:
 
 
 def main() -> None:
+    """用法: python -m polyreview.server <reviewer-name> [config.toml]
+
+    config.toml 可选（polyreview init 生成配置时自动带上）：
+    [[reviewer]] 自定义项优先于内置；[panel] timeout 覆盖默认超时。
+    """
     if len(sys.argv) < 2:
-        raise SystemExit("用法: python -m polyreview.server <reviewer-name> [reviewers.toml]")
-    adapter = get_adapter(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
+        raise SystemExit("用法: python -m polyreview.server <reviewer-name> [config.toml]")
+    cfg_path = sys.argv[2] if len(sys.argv) > 2 else None
+    adapter = get_adapter(sys.argv[1], cfg_path if os.path.isfile(cfg_path or "") else None)
+    if cfg_path and os.path.isfile(cfg_path):
+        from . import config
+        adapter.timeout = config.load(cfg_path)["panel"]["timeout"]
     create_server(adapter).run()  # stdio
 
 

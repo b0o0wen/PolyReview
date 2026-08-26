@@ -1,57 +1,112 @@
 """PolyReview CLI 入口。
 
 命令：
-  polyreview demo [--mock]      零成本演示完整评审循环（mock 评审员）
+  polyreview demo               零成本演示完整评审循环（mock 评审员）
   polyreview doctor             探测已安装的评审员 CLI + 实验性警告
-  polyreview init --host H      生成 MCP 接入配置（qoder/claude/cursor/vscode）
+  polyreview init --host H      一键安装：MCP 配置 + skill（qoder/claude/cursor/vscode）
+  polyreview config [...]       配置中心：查看/生成模板/设置 panel 项
   polyreview review ...         batch 模式：并行送审一轮，落盘 verdicts/sessions
 """
 
 import argparse
 import json
 import os
+import shutil
 import sys
 
-from . import __version__
+from . import __version__, config
 from .registry import REGISTRY, discover_installed, get_adapter
 
 _PY = sys.executable
+_SKILL_SRC = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                          "skills", "polyreview-review")
+
+# 各 host 的 skill 安装目录（个人全局）
+_SKILL_DIRS = {
+    "qoder": "~/.qoder-cn/skills",
+    "claude": "~/.claude/skills",
+    "cursor": "~/.cursor/skills",
+    "vscode": "~/.continue/skills",
+}
+_SKILL_NAMES = {"qoder": "Qoder", "claude": "Claude Code", "cursor": "Cursor", "vscode": "VS Code"}
 
 
-def _server_cmd(name: str) -> list[str]:
-    return [_PY, "-m", "polyreview.server", name]
+def _install_skill(host: str) -> str | None:
+    """把随包分发的 skill 复制到 host 的技能目录。返回目标路径或 None（源缺失）。"""
+    dst_root = os.path.expanduser(_SKILL_DIRS[host])
+    if not os.path.isdir(_SKILL_SRC):
+        return None
+    dst = os.path.join(dst_root, "polyreview-review")
+    if os.path.isdir(dst):
+        shutil.rmtree(dst)
+    shutil.copytree(_SKILL_SRC, dst)
+    return dst
+
+
+def _server_cmd(name: str, cfg_path: str | None) -> list[str]:
+    argv = [_PY, "-m", "polyreview.server", name]
+    if cfg_path:
+        argv += [cfg_path]
+    return argv
 
 
 def cmd_init(args) -> int:
-    names = [n.strip() for n in args.reviewers.split(",") if n.strip()]
+    loaded = config.load(args.config)
+    names = ([n.strip() for n in args.reviewers.split(",")] if args.reviewers
+             else loaded["panel"]["reviewers"])
+    for n in names:
+        if n not in REGISTRY and n not in {c.get("name") for c in loaded["reviewers"]}:
+            raise SystemExit(f"未知评审员 '{n}'（内置: {sorted(REGISTRY)}；自定义进 config.toml）")
+    cfg_path = loaded["source"]          # 有配置文件则让 server 启动时读同一份
+    host = args.host
     entries = {}
     for n in names:
-        entries[f"reviewer-{n}"] = {"type": "stdio",
-                                    "command": _PY,
-                                    "args": ["-m", "polyreview.server", n]}
-    host = args.host
-    if host == "qoder":
-        cfg = {"mcp": {"servers": entries}}          # 用户级 settings.json 追加；工作区级为 .vscode/mcp.json 的 {"servers": ...}
-    elif host == "claude":
-        print("# 逐条执行：")
+        entries[f"reviewer-{n}"] = {"type": "stdio", "command": _PY,
+                                    "args": ["-m", "polyreview.server", n] + ([cfg_path] if cfg_path else [])}
+
+    print(f"── PolyReview 一键安装 → {_SKILL_NAMES[host]} ──\n[1/2] MCP 评审员")
+    if host == "claude":
         for n in names:
-            argv = " ".join(_server_cmd(n))
-            print(f'claude mcp add --scope user reviewer-{n} -- {argv}')
+            print(f"  claude mcp add --scope user reviewer-{n} -- " +
+                  " ".join(_server_cmd(n, cfg_path)))
+    else:
+        target = args.write or {("qoder"): ".vscode/mcp.json",
+                                "cursor": ".cursor/mcp.json",
+                                "vscode": ".vscode/mcp.json"}[host]
+        key = "servers" if host in ("qoder", "vscode") else "mcpServers"
+        body = {key: entries}
+        if host == "qoder":
+            body = {"servers": entries}   # 工作区 .vscode/mcp.json 形态；用户级套 {"mcp": body}
+        os.makedirs(os.path.dirname(target) or ".", exist_ok=True)
+        with open(target, "w", encoding="utf-8") as f:
+            json.dump(body, f, ensure_ascii=False, indent=2)
+        print(f"  已写入 {target}（{', '.join(names)}）")
+
+    print("[2/2] Skill")
+    dst = _install_skill(host)
+    if dst:
+        print(f"  已安装 → {dst}")
+        print("\n完成 ✅  重载 host（Reload Window / 重启会话）后说：\n"
+              "  中文: \"多模型交叉评审 <方案/diff>\"   EN: \"cross-review <spec/diff>\"")
+    else:
+        print("  ⚠ skill 源缺失（skills/polyreview-review），跳过；MCP 已可用")
+    if cfg_path:
+        print(f"\n配置文件（两路径共用）: {cfg_path}")
+    return 0
+
+
+def cmd_config(args) -> int:
+    if args.config_cmd == "init":
+        config.write_template(args.path)
         return 0
-    elif host in ("cursor", "vscode"):
-        key = "mcpServers" if host == "cursor" else "servers"
-        cfg = {key: entries}
-        if host == "vscode":
-            print("# 写入工作区 .vscode/mcp.json")
-    else:
-        raise SystemExit(f"未知 host: {host}（支持 qoder/claude/cursor/vscode）")
-    if args.write:
-        os.makedirs(os.path.dirname(args.write) or ".", exist_ok=True)
-        with open(args.write, "w", encoding="utf-8") as f:
-            json.dump(cfg, f, ensure_ascii=False, indent=2)
-        print(f"已写入 {args.write}")
-    else:
-        print(json.dumps(cfg, ensure_ascii=False, indent=2))
+    if args.config_cmd == "set":
+        config.set_value(args.key, args.value)
+        return 0
+    loaded = config.load(None if args.config_cmd == "show" else None)
+    print(f"来源: {loaded['source'] or '内置默认（未发现配置文件）'}")
+    print(json.dumps(loaded["panel"], ensure_ascii=False, indent=2))
+    if loaded["reviewers"]:
+        print(f"自定义评审员: {[r.get('name') for r in loaded['reviewers']]}")
     return 0
 
 
@@ -62,7 +117,10 @@ def cmd_doctor(args) -> int:
         if a.experimental:
             line += "（实验性：命令模板未实测）"
         print(line + f"  {a.notes[:60]}")
-    print("\n✅=已安装可直接用  ⬜=未安装（安装对应 CLI 后即可）")
+    loaded = config.load()
+    print(f"\n评审团默认: {', '.join(loaded['panel']['reviewers'])}"
+          f"（max_rounds={loaded['panel']['max_rounds']}, timeout={loaded['panel']['timeout']}s）"
+          f"\n配置来源: {loaded['source'] or '内置默认'}")
     return 0
 
 
@@ -73,8 +131,18 @@ def cmd_demo(args) -> int:
 
 def cmd_review_impl(args) -> int:
     from .engine import run_round, all_approve
-    names = [n.strip() for n in args.reviewers.split(",") if n.strip()]
-    adapters = {n: get_adapter(n) for n in names}
+    loaded = config.load(args.config)
+    names = ([n.strip() for n in args.reviewers.split(",")] if args.reviewers
+             else loaded["panel"]["reviewers"])
+    customs = {c["name"]: c for c in loaded["reviewers"]}
+    adapters = {}
+    for n in names:
+        if n in customs:
+            item = dict(customs[n]); item.setdefault("binary", item["new_cmd"][0])
+            from .adapter import Adapter
+            adapters[n] = Adapter(**item)
+        else:
+            adapters[n] = get_adapter(n)
     state = args.state_dir or os.path.join("review_state", args.slug or "artifact")
     prior, log = {}, ""
     if args.round > 1:
@@ -86,6 +154,8 @@ def cmd_review_impl(args) -> int:
         dp = os.path.join(prev, "host_disposition.md")
         if os.path.exists(dp):
             log = open(dp, encoding="utf-8").read()
+    for a in adapters.values():
+        a.timeout = loaded["panel"]["timeout"]
     verdicts, _ = run_round(adapters, os.path.abspath(args.artifact),
                             os.path.join(state, f"round_{args.round}"),
                             mode=args.mode, cwd=args.cwd, prior_sessions=prior,
@@ -93,34 +163,47 @@ def cmd_review_impl(args) -> int:
     if all_approve(verdicts):
         print("\n全票 APPROVE ✅")
         return 0
-    print(f"\n未全票：处置 blocker/major 后写 host_disposition.md，再 --round {args.round + 1}")
+    print(f"\n未全票：处置 blocker/major 后写 host_disposition.md，再 --round {args.round + 1}"
+          f"（max_rounds={loaded['panel']['max_rounds']}）")
     return 1
 
 
 def main() -> None:
     p = argparse.ArgumentParser(prog="polyreview",
-                                description="多 agent 交叉评审：让任意 CLI agent 互相评审方案与代码")
+                                description="多模型交叉评审：让任意 CLI agent 互相评审方案与代码")
     p.add_argument("--version", action="version", version=__version__)
     sub = p.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("demo", help="零成本演示（mock）").set_defaults(func=cmd_demo)
+    sub.add_parser("doctor", help="探测评审员 CLI + 当前配置").set_defaults(func=cmd_doctor)
 
-    sub.add_parser("doctor", help="探测已安装的评审员 CLI").set_defaults(func=cmd_doctor)
-
-    pi = sub.add_parser("init", help="生成 MCP 接入配置")
+    pi = sub.add_parser("init", help="一键安装：MCP 配置 + skill")
     pi.add_argument("--host", required=True, choices=["qoder", "claude", "cursor", "vscode"])
-    pi.add_argument("--reviewers", default="kimi,codex", help="逗号分隔（默认 kimi,codex）")
-    pi.add_argument("--write", default=None, help="写入目标文件路径（默认打印）")
+    pi.add_argument("--reviewers", default=None, help="逗号分隔（默认取 config panel.reviewers）")
+    pi.add_argument("--write", default=None, help="MCP 配置写入路径（默认按 host 约定）")
+    pi.add_argument("--config", default=None, help="显式配置文件路径")
     pi.set_defaults(func=cmd_init)
+
+    pc = sub.add_parser("config", help="配置中心")
+    pcs = pc.add_subparsers(dest="config_cmd")
+    pcs.add_parser("show", help="查看生效配置").set_defaults(func=cmd_config)
+    pinit = pcs.add_parser("init", help="生成配置模板")
+    pinit.add_argument("--path", default=None)
+    pinit.set_defaults(func=cmd_config)
+    pset = pcs.add_parser("set", help="设置 panel 项（如 panel.max_rounds 5）")
+    pset.add_argument("key"); pset.add_argument("value")
+    pset.set_defaults(func=cmd_config)
+    pc.set_defaults(func=cmd_config, config_cmd="show")
 
     pr = sub.add_parser("review", help="batch 送审一轮")
     pr.add_argument("--artifact", required=True, help="评审对象文件（方案 md 或导出的 diff）")
-    pr.add_argument("--reviewers", default="kimi,codex")
+    pr.add_argument("--reviewers", default=None, help="逗号分隔（默认取 config）")
     pr.add_argument("--mode", default="spec", choices=["spec", "code"])
     pr.add_argument("--round", type=int, default=1)
     pr.add_argument("--slug", default=None, help="状态目录名（默认 artifact）")
     pr.add_argument("--state-dir", default=None)
     pr.add_argument("--cwd", default=None, help="评审员工作目录（默认当前目录）")
+    pr.add_argument("--config", default=None, help="显式配置文件路径")
     pr.set_defaults(func=cmd_review_impl)
 
     args = p.parse_args()

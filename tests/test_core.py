@@ -86,3 +86,60 @@ class TestMockLoop(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestConfig(unittest.TestCase):
+    def test_load_chain_and_customs(self):
+        import tempfile
+        from polyreview import config as cfg
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "config.toml")
+            open(p, "w").write(
+                '[panel]\nmax_rounds = 5\n\n'
+                '[[reviewer]]\nname = "echo"\nnew_cmd = ["echo", "{prompt}"]\n')
+            loaded = cfg.load(p)
+            self.assertEqual(loaded["panel"]["max_rounds"], 5)
+            self.assertEqual(loaded["panel"]["reviewers"], cfg.DEFAULTS["reviewers"])  # 未写项回落默认
+            self.assertEqual(loaded["reviewers"][0]["name"], "echo")
+
+    def test_set_value(self):
+        import tempfile
+        from polyreview import config as cfg
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "config.toml")
+            cfg.write_template(p)
+            cfg.set_value("panel.max_rounds", "5", p)
+            cfg.set_value("panel.reviewers", "kimi,codex,claude", p)
+            loaded = cfg.load(p)
+            self.assertEqual(loaded["panel"]["max_rounds"], 5)
+            self.assertEqual(loaded["panel"]["reviewers"], ["kimi", "codex", "claude"])
+
+    def test_batch_uses_custom_reviewer(self):
+        # batch 路径也能用 config 里的自定义评审员（此前只支持 MCP 路径）
+        import tempfile
+        from polyreview.adapter import Adapter
+        from polyreview import config as cfg
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "config.toml")
+            open(p, "w").write(
+                '[[reviewer]]\nname = "echo"\nnew_cmd = ["echo", "hello-{prompt}"]\n')
+            loaded = cfg.load(p)
+            item = dict(loaded["reviewers"][0]); item.setdefault("binary", "echo")
+            a = Adapter(**item)
+            out, err, rc = a.run("WORLD", None, None)
+            self.assertEqual(out, "hello-WORLD")
+
+
+class TestInit(unittest.TestCase):
+    def test_skill_install(self):
+        import tempfile
+        from polyreview.cli import _install_skill
+        with tempfile.TemporaryDirectory() as d:
+            import polyreview.cli as cli
+            old = cli._SKILL_DIRS["claude"]
+            cli._SKILL_DIRS["claude"] = d
+            try:
+                dst = _install_skill("claude")
+                self.assertTrue(os.path.isfile(os.path.join(dst, "SKILL.md")))
+            finally:
+                cli._SKILL_DIRS["claude"] = old
