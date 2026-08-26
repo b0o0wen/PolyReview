@@ -36,8 +36,7 @@ polyreview demo      # mock panel: REVISE → disposition → APPROVE, no keys n
 polyreview init --host claude   # one command: MCP servers + skill into your host
 ```
 
-> Prerequisite: **two or more CLIs from different vendors** installed & logged in (any number works — 2–3 is typical, more vendors = stronger cross-validation)
-> (cross-validation is the whole point — `polyreview scan` checks what you have).
+> Prerequisite: **at least one reviewer CLI that runs a *different model family* than your host** installed & logged in. One reviewer already cross-examines your host agent; 2–3 different vendors is where cross-validation shines (`polyreview scan` checks what you have).
 
 ## Real usage
 
