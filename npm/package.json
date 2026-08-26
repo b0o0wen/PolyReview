@@ -1,0 +1,13 @@
+{
+  "name": "polyreview",
+  "version": "0.1.0",
+  "description": "Let your AI coding agents review each other — cross-model review panel (Claude Code / Codex / Gemini / Qwen / Kimi / OpenCode / Aider). Thin npm launcher; Python backend is installed on first run.",
+  "license": "MIT",
+  "repository": "github:b0o0wen/PolyReview",
+  "homepage": "https://github.com/b0o0wen/PolyReview#readme",
+  "bugs": "https://github.com/b0o0wen/PolyReview/issues",
+  "keywords": ["mcp", "code-review", "llm", "multi-agent", "cross-review", "cli", "ai"],
+  "bin": { "polyreview": "bin/polyreview.js" },
+  "engines": { "node": ">=16" },
+  "files": ["bin/"]
+}

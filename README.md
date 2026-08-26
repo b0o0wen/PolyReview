@@ -22,7 +22,10 @@
 ## 30-second start (zero API cost)
 
 ```bash
-# fastest, no clone needed (after PyPI release: `uvx polyreview demo`)
+# npx / pnpx (JS folks: thin launcher, Python backend auto-installed on first run)
+npx polyreview demo
+
+# uvx (fastest for Python folks; after PyPI release: `uvx polyreview demo`)
 uvx --from git+https://github.com/b0o0wen/PolyReview.git polyreview demo
 
 # or the classic way
