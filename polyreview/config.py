@@ -20,7 +20,7 @@ DEFAULTS = {"reviewers": ["kimi", "codex"], "max_rounds": 20, "timeout": 3600}
 TEMPLATE = """\
 # PolyReview 配置。改完对 MCP 路径需重载 host；batch 路径即时生效。
 [panel]
-# 评审团成员（内置: kimi/codex/claude/qoder/trae/opencode；自定义见下方 [[reviewer]]）
+# 评审团成员（内置: claude/codex/gemini/qwen/kimi/opencode/aider/qoder；自定义见下方 [[reviewer]]）
 reviewers = ["kimi", "codex"]
 # 循环上限（host 驱动的自动循环护栏；batch 为单轮驱动不受限）
 max_rounds = 20

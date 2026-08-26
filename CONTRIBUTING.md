@@ -4,7 +4,7 @@
 
 ## 1. 验证实验性 adapter（最高优先）
 
-`qoder` / `trae` / `opencode` 的命令模板来自公开文档，未在真实安装上验证。
+`gemini` / `qwen` / `aider` / `qoder` 的命令模板来自公开文档，未在真实安装上验证（opencode 语法已实测）。
 你装了对应 CLI 的话，帮忙跑通并把结论发到 issue（或直接修 `registry.py` 提 PR）：
 
 ```bash

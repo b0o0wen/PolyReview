@@ -2,7 +2,7 @@
 
 内置 6 个 agent 适配器（用户只选 agent，不选模型）：
   - codex / claude / kimi：已实测（续聊链路验证通过）
-  - qoder / trae / opencode：实验性（命令模板来自公开文档，未实测）
+  - gemini / qwen / aider / qoder：实验性（命令模板来自公开文档，未实测）
 自定义 reviewer 用 TOML 声明，例如：
 
     [[reviewer]]
@@ -50,12 +50,6 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
         new_cmd=["qoder", "-p", "{prompt}"],
         experimental=True,
         notes="实验性：本机未安装，headless 参数按公开文档推断，待社区验证。",
-    ),
-    Adapter(
-        name="trae", binary="trae",
-        new_cmd=["trae", "-p", "{prompt}"],
-        experimental=True,
-        notes="实验性：本机未安装，待社区验证（Trae CLI）。",
     ),
     Adapter(
         name="opencode", binary="opencode",

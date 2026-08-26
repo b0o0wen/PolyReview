@@ -28,7 +28,7 @@
 
 ## v0.2 candidates
 
-- [ ] Verify experimental adapters (qoder / trae / opencode) on real installs → promote out of experimental
+- [ ] Verify experimental adapters (gemini / qwen / aider / qoder) on real installs → promote out of experimental
 - [ ] `polyreview transcript <slug>` — replay any review round from disk
 - [ ] Same-model warning: alert when two panel members resolve to the same underlying model (cross-validation void)
 - [ ] npm thin wrapper for `npx polyreview` (decide by uvx adoption data)

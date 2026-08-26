@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](pyproject.toml)
 
-**Let your AI coding agents review each other.** Turn any combination of CLI agents — Codex, Claude Code, Kimi, Qoder, Trae, OpenCode — into a cross-review panel that interrogates your specs and diffs until they converge.
+**Let your AI coding agents review each other.** Turn any combination of CLI agents — Claude Code, Codex, Gemini, Qwen, Kimi, OpenCode, Aider... — into a cross-review panel that interrogates your specs and diffs until they converge.
 
 > One model reviewing itself is circular. Two *different vendors* cross-examining your design doc is real review.
 
@@ -53,19 +53,20 @@ Or drive it from your MCP host (Qoder / Claude Code / Cursor / VS Code) — **th
 
 ## Supported reviewers
 
+按常见度排序：
+
 | Agent | Status | Resume |
 |-------|--------|--------|
-| kimi (Kimi Code) | tested | ✅ `kimi -r` |
-| codex (Codex CLI) | tested | ✅ `exec resume` |
 | claude (Claude Code) | tested | ✅ `--resume` |
-| opencode | syntax-verified | ✅ `run -s` |
+| codex (Codex CLI) | tested | ✅ `exec resume` |
 | gemini (Gemini CLI) | experimental | ✅ `--resume` (per docs) |
 | qwen (Qwen Code) | experimental | ✅ `--resume` (per docs) |
+| kimi (Kimi Code) | tested | ✅ `kimi -r` |
+| opencode | syntax-verified | ✅ `run -s` |
 | aider | experimental | — (stateless by design) |
 | qoder | experimental | — |
-| trae | experimental | — |
 
-Add any other CLI via `reviewers.toml` (command templates + a session-id regex) — see [registry docs](polyreview/registry.py). PRs welcome for the experimental three; each verified adapter ships with its community's blessing.
+Add any other CLI via `reviewers.toml` (command templates + a session-id regex) — see [registry docs](polyreview/registry.py). PRs welcome for the experimental ones; each verified adapter ships with its community's blessing.
 
 ## How it works
 
