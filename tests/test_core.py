@@ -50,6 +50,11 @@ class TestAdapters(unittest.TestCase):
         a = REGISTRY["codex"]
         self.assertEqual(a.extract_session("", "session id: 01a0-ff\nuser"), "01a0-ff")
 
+    def test_opencode_session_from_json_event(self):
+        a = REGISTRY["opencode"]
+        out = '{"type":"message","sessionID":"ses_fc1184f9","text":"ok"}'
+        self.assertEqual(a.extract_session(out, ""), "ses_fc1184f9")
+
     def test_claude_session_from_json(self):
         a = REGISTRY["claude"]
         out = json.dumps({"session_id": "s-1", "result": "ok"})

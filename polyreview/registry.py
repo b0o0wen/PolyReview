@@ -59,9 +59,13 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
     ),
     Adapter(
         name="opencode", binary="opencode",
+        binary_hints=["~/.opencode/bin/opencode"],
         new_cmd=["opencode", "run", "{prompt}"],
-        experimental=True,
-        notes="实验性：本机未安装。opencode run 为 headless 模式，续聊参数待验证。",
+        resume_cmd=["opencode", "run", "-s", "{session}", "{prompt}"],
+        session_regex=r'"sessionID"\s*:\s*"(ses_[^"]+)"',
+        notes="OpenCode（SST）。headless = opencode run；续聊 -s <id>；"
+              "sessionID 在 JSON 事件流（ses_ 前缀）。模型跟随 opencode providers 配置。"
+              "命令语法已实测（1.18.23），评审回复链路待有效 key 验证。",
     ),
 ]}
 
