@@ -33,7 +33,7 @@ git diff main...HEAD > review_state/pr/change.diff
 polyreview review --artifact review_state/pr/change.diff --mode code
 ```
 
-Or drive it from your MCP host (Qoder / Claude Code / Cursor / VS Code): each reviewer is a standard MCP server exposing `review(request, session_id, cwd)`, `identity()`, `whereami()`. The bundled [skill](skills/polyreview-review/SKILL.md) turns it into "multi-model cross-review" on demand.
+Or drive it from your MCP host (Qoder / Claude Code / Cursor / VS Code) — **the primary mode**: your host agent arbitrates (drafts adopt/rebut dispositions, you approve) while reviewers cross-examine. Each reviewer is a standard MCP server exposing `review(request, session_id, cwd)`, `identity()`, `whereami()`. The bundled [skill](polyreview/skills/polyreview/SKILL.md) turns it into "multi-model cross-review" on demand. The batch CLI above is the CI/scripting complement (exit code 0 = unanimous APPROVE), not a second frontend — see [ROADMAP](ROADMAP.md).
 
 ## Supported reviewers
 
