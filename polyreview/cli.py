@@ -2,7 +2,7 @@
 
 命令：
   polyreview demo               零成本演示完整评审循环（mock 评审员）
-  polyreview doctor             探测已安装的评审员 CLI + 实验性警告
+  polyreview scan             探测已安装的评审员 CLI + 实验性警告
   polyreview init --host H      一键安装：MCP 配置 + skill（qoder/claude/cursor/vscode）
   polyreview config [...]       配置中心：查看/生成模板/设置 panel 项
   polyreview review ...         batch 模式：并行送审一轮，落盘 verdicts/sessions
@@ -117,7 +117,7 @@ def cmd_config(args) -> int:
     return 0
 
 
-def cmd_doctor(args) -> int:
+def cmd_scan(args) -> int:
     print(f"polyreview {__version__} — 评审员 CLI 探测：\n")
     for a, ok in discover_installed():
         line = f"  {'✅' if ok else '⬜'} {a.name:<10}"
@@ -182,7 +182,7 @@ def main() -> None:
     sub = p.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("demo", help="零成本演示（mock）").set_defaults(func=cmd_demo)
-    sub.add_parser("doctor", help="探测评审员 CLI + 当前配置").set_defaults(func=cmd_doctor)
+    sub.add_parser("scan", help="扫描已装的评审员 CLI + 当前配置").set_defaults(func=cmd_scan)
 
     pi = sub.add_parser("init", help="一键安装：MCP 配置 + skill")
     pi.add_argument("--host", required=True, choices=["qoder", "claude", "cursor", "vscode"])

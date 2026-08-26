@@ -9,7 +9,7 @@
 ```bash
 pip install -e .
 polyreview demo                          # 零成本 mock 演示：REVISE → 处置 → APPROVE
-polyreview doctor                        # 探测本机已装的评审员 CLI
+polyreview scan                        # 探测本机已装的评审员 CLI
 polyreview init --host qoder             # 一键生成 MCP 接入配置
 polyreview review --artifact 方案.md --reviewers kimi,codex
 ```

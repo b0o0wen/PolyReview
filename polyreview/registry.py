@@ -83,7 +83,7 @@ def get_adapter(name: str, config_path: str | None = None) -> Adapter:
 
 
 def discover_installed() -> list[tuple[Adapter, bool]]:
-    """探测哪些评审员 CLI 已安装（doctor 用）。返回 [(adapter, installed)]。"""
+    """探测哪些评审员 CLI 已安装（scan 用）。返回 [(adapter, installed)]。"""
     import shutil
     found = []
     for a in REGISTRY.values():

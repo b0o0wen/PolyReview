@@ -17,7 +17,7 @@
 - **Cross-vendor validation**: two reviewers from different model families independently locate the same defects far more often than chance — real sessions showed duplicate hits on 3 separate rounds ([methodology](docs/methodology.md))
 - **Converging, not endless**: verdict protocol (`APPROVE`/`REVISE` + severity-tagged issues) with a host arbitrator — real sessions converge in 2-4 rounds
 - **Stateful when it helps**: each reviewer resumes its own session across rounds (remembers what it flagged), with automatic new-session fallback — correctness never depends on the memory
-- **Reviewer = agent, not model**: you pick which CLIs sit on the panel; each keeps its own model/config. `polyreview doctor` detects what's installed
+- **Reviewer = agent, not model**: you pick which CLIs sit on the panel; each keeps its own model/config. `polyreview scan` detects what's installed
 
 ## 30-second start (zero API cost)
 
@@ -34,12 +34,12 @@ polyreview init --host claude   # one command: MCP servers + skill into your hos
 ```
 
 > Prerequisite: at least **two CLIs from different vendors** installed & logged in
-> (cross-validation is the whole point — `polyreview doctor` checks what you have).
+> (cross-validation is the whole point — `polyreview scan` checks what you have).
 
 ## Real usage
 
 ```bash
-polyreview doctor                      # which reviewer CLIs are installed?
+polyreview scan                      # which reviewer CLIs are installed?
 polyreview init --host claude          # prints `claude mcp add ...` for each reviewer
 polyreview init --host qoder --write .vscode/mcp.json --reviewers kimi,codex
 

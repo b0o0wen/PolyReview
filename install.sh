@@ -25,5 +25,5 @@ fi
 
 say "安装完成。下一步："
 echo "  $BIN demo                 # 30 秒零成本试用（mock 评审团）"
-echo "  $BIN doctor               # 探测本机已装的评审员 CLI"
+echo "  $BIN scan               # 探测本机已装的评审员 CLI"
 echo "  $BIN init --host claude   # 一键接入 host（qoder/claude/cursor/vscode）"

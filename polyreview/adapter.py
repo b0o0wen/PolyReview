@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 @dataclass
 class Adapter:
     name: str
-    binary: str                      # doctor 用：探测是否安装
+    binary: str                      # scan 用：探测是否安装
     new_cmd: list[str]               # 含 '{prompt}' 占位符
     resume_cmd: list[str] | None = None    # 含 '{prompt}' '{session}'；None=该 CLI 无续聊
     session_regex: str | None = None       # group(1) = 会话 id，在 stderr+stdout 上搜索
