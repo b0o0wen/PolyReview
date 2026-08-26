@@ -164,8 +164,8 @@ class TestAddReviewer(unittest.TestCase):
 class TestInitHostPick(unittest.TestCase):
     def test_invalid_host_shows_menu(self):
         import subprocess as sp
-        r = sp.run(["../.venv/bin/python", "-m", "polyreview", "init", "--host", "windsurf"],
-                   capture_output=True, text=True, cwd="..")
+        r = sp.run([sys.executable, "-m", "polyreview", "init", "--host", "windsurf"],
+                   capture_output=True, text=True)
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("qoder", r.stdout + r.stderr)      # 教学表出现
         self.assertIn("polyreview init", (r.stdout + r.stderr))
