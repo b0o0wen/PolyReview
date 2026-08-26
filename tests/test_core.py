@@ -108,7 +108,7 @@ class TestConfig(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             p = os.path.join(d, "config.toml")
             cfg.write_template(p)
-            cfg.set_value("panel.max_rounds", "5", p)
+            cfg.set_value("max_rounds", "5", p)            # 裸键形式
             cfg.set_value("panel.reviewers", "kimi,codex,claude", p)
             loaded = cfg.load(p)
             self.assertEqual(loaded["panel"]["max_rounds"], 5)
@@ -143,3 +143,19 @@ class TestInit(unittest.TestCase):
                 self.assertTrue(os.path.isfile(os.path.join(dst, "SKILL.md")))
             finally:
                 cli._SKILL_DIRS["claude"] = old
+
+
+class TestAddReviewer(unittest.TestCase):
+    def test_add_and_roundtrip(self):
+        import tempfile
+        from polyreview import config as cfg
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "config.toml")
+            cfg.write_template(p)
+            cfg.add_reviewer("aider", "aider --message {prompt} --yes-always",
+                             resume_cmd="aider --resume {session} --message {prompt}",
+                             session_regex=r"session (\S+)", path=p)
+            loaded = cfg.load(p)
+            r = [x for x in loaded["reviewers"] if x["name"] == "aider"][0]
+            self.assertEqual(r["new_cmd"][0], "aider")
+            self.assertIn("{session}", r["resume_cmd"][2])

@@ -18,8 +18,9 @@ from . import __version__, config
 from .registry import REGISTRY, discover_installed, get_adapter
 
 _PY = sys.executable
-_SKILL_SRC = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                          "skills", "polyreview-review")
+# skill 随包分发（打包进 wheel，pip 安装后 init 可用）
+_SKILL_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                          "skills", "polyreview")
 
 # 各 host 的 skill 安装目录（个人全局）
 _SKILL_DIRS = {
@@ -32,11 +33,11 @@ _SKILL_NAMES = {"qoder": "Qoder", "claude": "Claude Code", "cursor": "Cursor", "
 
 
 def _install_skill(host: str) -> str | None:
-    """把随包分发的 skill 复制到 host 的技能目录。返回目标路径或 None（源缺失）。"""
+    """把随包分发的 skill 复制到 host 的技能目录（目标目录名 = polyreview，无重复 review）。"""
     dst_root = os.path.expanduser(_SKILL_DIRS[host])
     if not os.path.isdir(_SKILL_SRC):
         return None
-    dst = os.path.join(dst_root, "polyreview-review")
+    dst = os.path.join(dst_root, "polyreview")
     if os.path.isdir(dst):
         shutil.rmtree(dst)
     shutil.copytree(_SKILL_SRC, dst)
@@ -100,13 +101,19 @@ def cmd_config(args) -> int:
         config.write_template(args.path)
         return 0
     if args.config_cmd == "set":
-        config.set_value(args.key, args.value)
+        key = args.key
+        if "." not in key:            # 裸键（max_rounds 5）等价 panel.max_rounds
+            key = f"panel.{key}"
+        config.set_value(key, args.value)
         return 0
-    loaded = config.load(None if args.config_cmd == "show" else None)
+    if args.config_cmd == "add-reviewer":
+        config.add_reviewer(args.name, args.new, args.resume, args.session_regex)
+        return 0
+    loaded = config.load()
     print(f"来源: {loaded['source'] or '内置默认（未发现配置文件）'}")
     print(json.dumps(loaded["panel"], ensure_ascii=False, indent=2))
     if loaded["reviewers"]:
-        print(f"自定义评审员: {[r.get('name') for r in loaded['reviewers']]}")
+        print(f"自定义评审员: {[r.get('name') for r in loaded['reviewers']]}（config add-reviewer 可再加）")
     return 0
 
 
@@ -190,9 +197,16 @@ def main() -> None:
     pinit = pcs.add_parser("init", help="生成配置模板")
     pinit.add_argument("--path", default=None)
     pinit.set_defaults(func=cmd_config)
-    pset = pcs.add_parser("set", help="设置 panel 项（如 panel.max_rounds 5）")
+    pset = pcs.add_parser("set", help="设置 panel 项（裸键即可：max_rounds 5 / reviewers kimi,codex）")
     pset.add_argument("key"); pset.add_argument("value")
     pset.set_defaults(func=cmd_config)
+    padd = pcs.add_parser("add-reviewer", help="添加自定义评审员到配置（写入 [[reviewer]]）")
+    padd.add_argument("name", help="评审员名（如 aider）")
+    padd.add_argument("--new", required=True,
+                      help="新建会话命令模板，引号包住，含 {prompt}（如 'aider --message {prompt} --yes-always'）")
+    padd.add_argument("--resume", default=None, help="续聊命令模板，含 {session} {prompt}")
+    padd.add_argument("--session-regex", default=None, help="从输出提取会话 id 的正则（group 1）")
+    padd.set_defaults(func=cmd_config)
     pc.set_defaults(func=cmd_config, config_cmd="show")
 
     pr = sub.add_parser("review", help="batch 送审一轮")

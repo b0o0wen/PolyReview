@@ -27,3 +27,6 @@ polyreview = "polyreview.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["polyreview*"]
+
+[tool.setuptools.package-data]
+polyreview = ["skills/polyreview/SKILL.md"]

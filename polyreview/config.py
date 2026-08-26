@@ -121,3 +121,29 @@ def json_like(value: str) -> str:
     if value.isdigit():
         return value
     return f'"{value}"'
+
+
+def add_reviewer(name: str, new_cmd: str, resume_cmd: str | None = None,
+                 session_regex: str | None = None, path: str | None = None) -> None:
+    """追加一个 [[reviewer]] 到配置文件（纯文本追加，可读可手改）。
+
+    new_cmd/resume_cmd 为 shell 风格字符串（含 {prompt}/{session} 占位），shlex 拆成数组。
+    """
+    import shlex
+    target = path or find_config() or user_config_path()
+    if not os.path.exists(target):
+        write_template(target)
+    lines = ["", "[[reviewer]]", f'name = "{name}"',
+             "new_cmd = " + _toml_array(shlex.split(new_cmd))]
+    if resume_cmd:
+        lines.append("resume_cmd = " + _toml_array(shlex.split(resume_cmd)))
+    if session_regex:
+        lines.append(f"session_regex = '{session_regex}'")
+    with open(target, "a", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    print(f"已添加评审员 {name} → {target}\n"
+          f"启用：polyreview config set reviewers <,...{name},...> 或 init --reviewers 含 {name}")
+
+
+def _toml_array(items: list[str]) -> str:
+    return "[" + ", ".join(f'"{i}"' for i in items) + "]"

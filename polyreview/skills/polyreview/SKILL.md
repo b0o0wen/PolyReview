@@ -1,5 +1,5 @@
 ---
-name: polyreview-review
+name: polyreview
 description: 多模型交叉评审（PolyReview）：并行调用 reviewer-kimi 与 reviewer-codex 等 MCP 评审员（不同厂商 CLI agent）对技术方案或代码变更做多轮交叉评审，默认有状态续聊（session_id 跨轮传递），主持人（当前会话 agent）对每条意见做采纳或反驳处置，循环直到全票 APPROVE 或达轮数上限（默认 20 轮）。仅当用户明确要求多模型交叉评审、交叉评审、多人评审、多人 review（不限对象）、专家团评审、多人讨论、多 agent 评审，或点名 reviewer-kimi/reviewer-codex/评审团时使用；单人评审意图（"评审方案"、"review 一下"、"帮忙看看"）不要使用本 skill。
 ---
 
