@@ -1,4 +1,4 @@
-# Tribunal ⚖️（多模型交叉评审）
+# PolyReview ⚖️（多模型交叉评审）
 
 让任意 CLI agent（Codex / Claude Code / Kimi / Qoder / Trae / OpenCode...）互相评审你的技术方案与代码 diff，直到全票通过。
 
@@ -8,10 +8,10 @@
 
 ```bash
 pip install -e .
-tribunal demo                          # 零成本 mock 演示：REVISE → 处置 → APPROVE
-tribunal doctor                        # 探测本机已装的评审员 CLI
-tribunal init --host qoder             # 一键生成 MCP 接入配置
-tribunal review --artifact 方案.md --reviewers kimi,codex
+polyreview demo                          # 零成本 mock 演示：REVISE → 处置 → APPROVE
+polyreview doctor                        # 探测本机已装的评审员 CLI
+polyreview init --host qoder             # 一键生成 MCP 接入配置
+polyreview review --artifact 方案.md --reviewers kimi,codex
 ```
 
 设计理念与协议见 [README.md](README.md)（英文主文档）与 [docs/methodology.md](docs/methodology.md)。

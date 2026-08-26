@@ -1,10 +1,10 @@
-"""Tribunal CLI 入口。
+"""PolyReview CLI 入口。
 
 命令：
-  tribunal demo [--mock]      零成本演示完整评审循环（mock 评审员）
-  tribunal doctor             探测已安装的评审员 CLI + 实验性警告
-  tribunal init --host H      生成 MCP 接入配置（qoder/claude/cursor/vscode）
-  tribunal review ...         batch 模式：并行送审一轮，落盘 verdicts/sessions
+  polyreview demo [--mock]      零成本演示完整评审循环（mock 评审员）
+  polyreview doctor             探测已安装的评审员 CLI + 实验性警告
+  polyreview init --host H      生成 MCP 接入配置（qoder/claude/cursor/vscode）
+  polyreview review ...         batch 模式：并行送审一轮，落盘 verdicts/sessions
 """
 
 import argparse
@@ -19,7 +19,7 @@ _PY = sys.executable
 
 
 def _server_cmd(name: str) -> list[str]:
-    return [_PY, "-m", "tribunal.server", name]
+    return [_PY, "-m", "polyreview.server", name]
 
 
 def cmd_init(args) -> int:
@@ -28,7 +28,7 @@ def cmd_init(args) -> int:
     for n in names:
         entries[f"reviewer-{n}"] = {"type": "stdio",
                                     "command": _PY,
-                                    "args": ["-m", "tribunal.server", n]}
+                                    "args": ["-m", "polyreview.server", n]}
     host = args.host
     if host == "qoder":
         cfg = {"mcp": {"servers": entries}}          # 用户级 settings.json 追加；工作区级为 .vscode/mcp.json 的 {"servers": ...}
@@ -56,7 +56,7 @@ def cmd_init(args) -> int:
 
 
 def cmd_doctor(args) -> int:
-    print(f"tribunal {__version__} — 评审员 CLI 探测：\n")
+    print(f"polyreview {__version__} — 评审员 CLI 探测：\n")
     for a, ok in discover_installed():
         line = f"  {'✅' if ok else '⬜'} {a.name:<10}"
         if a.experimental:
@@ -98,7 +98,7 @@ def cmd_review_impl(args) -> int:
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(prog="tribunal",
+    p = argparse.ArgumentParser(prog="polyreview",
                                 description="多 agent 交叉评审：让任意 CLI agent 互相评审方案与代码")
     p.add_argument("--version", action="version", version=__version__)
     sub = p.add_subparsers(dest="cmd", required=True)

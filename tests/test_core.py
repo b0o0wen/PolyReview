@@ -11,10 +11,10 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tribunal.adapter import Adapter
-from tribunal.engine import parse_verdict, blocking_issues, all_approve, run_round
-from tribunal.mock import MockAdapter
-from tribunal.registry import REGISTRY, get_adapter
+from polyreview.adapter import Adapter
+from polyreview.engine import parse_verdict, blocking_issues, all_approve, run_round
+from polyreview.mock import MockAdapter
+from polyreview.registry import REGISTRY, get_adapter
 
 
 class TestVerdict(unittest.TestCase):
@@ -61,7 +61,7 @@ class TestAdapters(unittest.TestCase):
         self.assertNotIn("resume", " ".join(a.build("P", None)))
 
     def test_custom_toml(self):
-        path = "/tmp/_tribunal_test_reviewers.toml"
+        path = "/tmp/_polyreview_test_reviewers.toml"
         open(path, "w").write(
             '[[reviewer]]\nname = "echo"\nnew_cmd = ["echo", "{prompt}"]\n')
         a = get_adapter("echo", path)

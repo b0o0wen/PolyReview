@@ -1,6 +1,6 @@
 # Host compatibility field notes
 
-各 MCP host 的实测差异与 Tribunal 的应对。给贡献者排障用，都是真金白银踩出来的。
+各 MCP host 的实测差异与 PolyReview 的应对。给贡献者排障用，都是真金白银踩出来的。
 
 ## 1. stdin 继承导致 CLI 挂起（最隐蔽）
 
@@ -17,7 +17,7 @@ codex 原生 `codex mcp-server` 把 threadId 放在 structuredContent 与事件�
 永远无法续聊（实测 4 轮评审全部退化为新线程重发）。
 
 **应对**：不用原生 server，adapter 走 `codex exec` 子进程，session id 从 stderr
-头部解析后**放进返回的明文 JSON**。这也是 Tribunal 自己做 wrapper 而不直接
+头部解析后**放进返回的明文 JSON**。这也是 PolyReview 自己做 wrapper 而不直接
 挂原生 mcp-server 的原因。
 
 ## 3. MCP roots 支持不一
@@ -25,7 +25,7 @@ codex 原生 `codex mcp-server` 把 threadId 放在 structuredContent 与事件�
 标准 MCP roots 允许 server 向 host 询问当前工作区。实测 Qoder 不提供，
 Claude Code 系 host 提供。
 
-**应对**：cwd 解析链 = 显式 `cwd` 参数 → roots → `TRIBUNAL_CWD` env →
+**应对**：cwd 解析链 = 显式 `cwd` 参数 → roots → `POLYREVIEW_CWD` env →
 进程 cwd（带 .git 等工程标记）→ 未设置。skill 层规则：host 驱动时**显式传 cwd**，
 不赌 roots。
 

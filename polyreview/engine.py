@@ -126,7 +126,7 @@ def demo() -> int:
     state = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                          "demo_state")
 
-    print("── Tribunal demo（mock，零 API 成本）──")
+    print("── PolyReview demo（mock，零 API 成本）──")
     v1, s1 = run_round(adapters, artifact, os.path.join(state, "round_1"))
     print(f"round 1: {'全票 APPROVE' if all_approve(v1) else 'REVISE（处置后复核）'}")
 

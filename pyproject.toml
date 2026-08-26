@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tribunal"
+name = "polyreview"
 version = "0.1.0"
 description = "Multi-agent cross-review panel: let any CLI agents (codex/claude/kimi/...) review your specs & code against each other"
 readme = "README.md"
@@ -23,7 +23,7 @@ dependencies = ["mcp>=1.0,<2"]
 dev = ["pytest"]
 
 [project.scripts]
-tribunal = "tribunal.cli:main"
+polyreview = "polyreview.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["tribunal*"]
+include = ["polyreview*"]

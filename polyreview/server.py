@@ -1,4 +1,4 @@
-"""通用 MCP server 工厂：`python -m tribunal.server <reviewer-name>` 启动一个评审员。
+"""通用 MCP server 工厂：`python -m polyreview.server <reviewer-name>` 启动一个评审员。
 
 与 adapter 解耦：任何注册表里的 agent（含 TOML 自定义）都能一键变成 MCP server。
 工具（对任意 host 语义一致）：
@@ -6,7 +6,7 @@
   identity()                              → 评审员身份卡（含模型跟随说明）
   whereami(cwd="")                        → 工作目录解析自检（不调模型）
 
-注意：cwd 解析链 = 显式参数 → MCP roots → env TRIBUNAL_CWD → 进程 cwd（带工程标记）。
+注意：cwd 解析链 = 显式参数 → MCP roots → env POLYREVIEW_CWD → 进程 cwd（带工程标记）。
 部分 host（如 Qoder）不提供 roots 且不透传 structuredContent，故返回值走明文 JSON。
 """
 
@@ -39,9 +39,9 @@ async def _resolve_cwd(ctx: Context, explicit: str = "") -> tuple[str, str]:
                     return path, "roots"
     except Exception:
         pass
-    env_cwd = os.environ.get("TRIBUNAL_CWD", "")
+    env_cwd = os.environ.get("POLYREVIEW_CWD", "")
     if env_cwd and os.path.isdir(env_cwd):
-        return env_cwd, "env:TRIBUNAL_CWD"
+        return env_cwd, "env:POLYREVIEW_CWD"
     proc_cwd = os.getcwd()
     if _looks_like_workspace(proc_cwd):
         return proc_cwd, "process-cwd"
@@ -89,7 +89,7 @@ def create_server(adapter, server_name: str | None = None) -> FastMCP:
 
 def main() -> None:
     if len(sys.argv) < 2:
-        raise SystemExit("用法: python -m tribunal.server <reviewer-name> [reviewers.toml]")
+        raise SystemExit("用法: python -m polyreview.server <reviewer-name> [reviewers.toml]")
     adapter = get_adapter(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
     create_server(adapter).run()  # stdio
 
