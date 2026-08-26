@@ -8,13 +8,13 @@
 
 **Let your AI coding agents review each other.** Turn any combination of CLI agents — Claude Code, Codex, Gemini, Qwen, Kimi, OpenCode, Aider... — into a cross-review panel that interrogates your specs and diffs until they converge.
 
-> One model reviewing itself is circular. Two *different vendors* cross-examining your design doc is real review.
+> One model reviewing itself is circular. *Different vendors* cross-examining your design doc is real review.
 
-<!-- TODO(P2): GIF demo here — host mode: two vendors independently catch the same issue, host arbitrates, verdict JSON, 3-round convergence -->
+<!-- TODO(P2): GIF demo here — host mode: e.g. two vendors independently catch the same issue (the cross-validation money shot), host arbitrates, verdict JSON, convergence -->
 
 ## Why
 
-- **Cross-vendor validation**: two reviewers from different model families independently locate the same defects far more often than chance — real sessions showed duplicate hits on 3 separate rounds ([methodology](docs/methodology.md))
+- **Cross-vendor validation**: reviewers from different model families independently locate the same defects far more often than chance — real sessions showed duplicate hits on 3 separate rounds ([methodology](docs/methodology.md))
 - **Converging, not endless**: verdict protocol (`APPROVE`/`REVISE` + severity-tagged issues) with a host arbitrator — real sessions converge in 2-4 rounds
 - **Stateful when it helps**: each reviewer resumes its own session across rounds (remembers what it flagged), with automatic new-session fallback — correctness never depends on the memory
 - **Reviewer = agent, not model**: you pick which CLIs sit on the panel; each keeps its own model/config. `polyreview scan` detects what's installed
@@ -36,7 +36,7 @@ polyreview demo      # mock panel: REVISE → disposition → APPROVE, no keys n
 polyreview init --host claude   # one command: MCP servers + skill into your host
 ```
 
-> Prerequisite: at least **two CLIs from different vendors** installed & logged in
+> Prerequisite: **two or more CLIs from different vendors** installed & logged in (any number works — 2–3 is typical, more vendors = stronger cross-validation)
 > (cross-validation is the whole point — `polyreview scan` checks what you have).
 
 ## Real usage

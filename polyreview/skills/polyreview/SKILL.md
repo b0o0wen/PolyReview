@@ -32,7 +32,7 @@ description: 多模型交叉评审（PolyReview）：并行调用 reviewer-kimi 
 
 ```
 - [ ] 1. 确定工件：方案路径 / 导出 diff；建 review_state/<slug>/round_N/
-- [ ] 2. 并行送审两位评审员（可先 identity 核对异构性）
+- [ ] 2. 并行送审全部评审员（config 里的 panel.reviewers，任意数量；可先逐个 identity 核对异构性）
 - [ ] 3. 解析 verdict（最后一个 ```json 块）+ 提取 session_id → sessions.json
 - [ ] 4. 全票 APPROVE → FINAL_REPORT.md 收尾
 - [ ] 5. 否则逐条处置 blocker/major（采纳=改工件 / 反驳=写理由）→
