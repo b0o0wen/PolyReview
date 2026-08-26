@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "reviewer-kimi": {
+      "type": "stdio",
+      "command": "/Users/weibowen/engineering/a2a_agents/.venv/bin/python",
+      "args": [
+        "-m",
+        "polyreview.server",
+        "kimi",
+        "/Users/weibowen/.config/polyreview/config.toml"
+      ]
+    }
+  }
+}

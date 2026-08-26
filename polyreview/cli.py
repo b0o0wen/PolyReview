@@ -22,7 +22,7 @@ _PY = sys.executable
 _SKILL_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                           "skills", "polyreview")
 
-# 各 host 的 skill 安装目录（个人全局）
+# 各 host 的 skill 安装目录（个人全局）与一句话说明（选单/报错用）
 _SKILL_DIRS = {
     "qoder": "~/.qoder-cn/skills",
     "claude": "~/.claude/skills",
@@ -30,6 +30,41 @@ _SKILL_DIRS = {
     "vscode": "~/.continue/skills",
 }
 _SKILL_NAMES = {"qoder": "Qoder", "claude": "Claude Code", "cursor": "Cursor", "vscode": "VS Code"}
+_HOST_DESCS = {
+    "qoder": "字节的 AI IDE（QoderCN），在它的会话里用",
+    "claude": "终端里的 Claude Code CLI，`claude` 命令启动",
+    "cursor": "Cursor 编辑器（AI IDE）",
+    "vscode": "Visual Studio Code（含 Continue 等扩展生态）",
+}
+
+
+def _print_host_menu() -> None:
+    """列出四个 host 的说明表（选单/报错教学共用）。"""
+    print("  host 选哪个？看你在哪个工具里和 AI 对话：\n")
+    for i, (h, desc) in enumerate(_HOST_DESCS.items(), 1):
+        print(f"  {i}. {h:<8} {_SKILL_NAMES[h]} — {desc}")
+    print()
+
+
+def _pick_host(arg_host: str | None) -> str:
+    """--host 缺省 → 交互选单；非法值 → 报错并展示说明表（把报错变成教学）。"""
+    if arg_host is None:
+        print("── PolyReview 一键接入 ──")
+        _print_host_menu()
+        choice = input("选择序号（1-4）或直接回车退出: ").strip()
+        if not choice:
+            raise SystemExit("未选择 host，退出（可重跑: polyreview init --host <name>）")
+        hosts = list(_HOST_DESCS)
+        try:
+            return hosts[int(choice) - 1]
+        except (ValueError, IndexError):
+            raise SystemExit(f"无效选择 '{choice}'；直接指定: polyreview init --host <{'/'.join(hosts)}>")
+    if arg_host not in _SKILL_DIRS:
+        print(f"✗ 未知 host '{arg_host}'\n")
+        _print_host_menu()
+        raise SystemExit(f"用法: polyreview init --host <{'/'.join(_SKILL_DIRS)}>\n"
+                         f"或不带 --host 进入选单: polyreview init")
+    return arg_host
 
 
 def _install_skill(host: str) -> str | None:
@@ -59,7 +94,7 @@ def cmd_init(args) -> int:
         if n not in REGISTRY and n not in {c.get("name") for c in loaded["reviewers"]}:
             raise SystemExit(f"未知评审员 '{n}'（内置: {sorted(REGISTRY)}；自定义进 config.toml）")
     cfg_path = loaded["source"]          # 有配置文件则让 server 启动时读同一份
-    host = args.host
+    host = _pick_host(args.host)
     entries = {}
     for n in names:
         entries[f"reviewer-{n}"] = {"type": "stdio", "command": _PY,
@@ -118,7 +153,7 @@ def cmd_config(args) -> int:
 
 
 def cmd_scan(args) -> int:
-    print(f"polyreview {__version__} — 评审员 CLI 探测：\n")
+    print(f"polyreview {__version__} — 评审员 CLI 扫描：\n")
     for a, ok in discover_installed():
         line = f"  {'✅' if ok else '⬜'} {a.name:<10}"
         if a.experimental:
@@ -184,8 +219,9 @@ def main() -> None:
     sub.add_parser("demo", help="零成本演示（mock）").set_defaults(func=cmd_demo)
     sub.add_parser("scan", help="扫描已装的评审员 CLI + 当前配置").set_defaults(func=cmd_scan)
 
-    pi = sub.add_parser("init", help="一键安装：MCP 配置 + skill")
-    pi.add_argument("--host", required=True, choices=["qoder", "claude", "cursor", "vscode"])
+    pi = sub.add_parser("init", help="一键安装：MCP 配置 + skill（不带 --host 进选单）")
+    pi.add_argument("--host", default=None,
+                    help="目标 host：qoder/claude/cursor/vscode（缺省进交互选单）")
     pi.add_argument("--reviewers", default=None, help="逗号分隔（默认取 config panel.reviewers）")
     pi.add_argument("--write", default=None, help="MCP 配置写入路径（默认按 host 约定）")
     pi.add_argument("--config", default=None, help="显式配置文件路径")

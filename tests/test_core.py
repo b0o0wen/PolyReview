@@ -159,3 +159,13 @@ class TestAddReviewer(unittest.TestCase):
             r = [x for x in loaded["reviewers"] if x["name"] == "aider"][0]
             self.assertEqual(r["new_cmd"][0], "aider")
             self.assertIn("{session}", r["resume_cmd"][2])
+
+
+class TestInitHostPick(unittest.TestCase):
+    def test_invalid_host_shows_menu(self):
+        import subprocess as sp
+        r = sp.run(["../.venv/bin/python", "-m", "polyreview", "init", "--host", "windsurf"],
+                   capture_output=True, text=True, cwd="..")
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn("qoder", r.stdout + r.stderr)      # 教学表出现
+        self.assertIn("polyreview init", (r.stdout + r.stderr))
