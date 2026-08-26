@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -e . && pip install pytest
+      - run: python -m unittest discover -s tests -v   # 零模型成本：mock + 纯函数
+      # demo 冒烟（mock 评审团，两轮收敛，退出码 0）
+      - run: python -m polyreview demo

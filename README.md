@@ -1,10 +1,16 @@
 # PolyReview ⚖️
 
+<!-- TODO(P2): social preview card (1280x640): cross-vendor reviewers converge in 3 rounds -->
+
+[![CI](https://github.com/b0o0wen/PolyReview/actions/workflows/ci.yml/badge.svg)](https://github.com/b0o0wen/PolyReview/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](pyproject.toml)
+
 **Let your AI coding agents review each other.** Turn any combination of CLI agents — Codex, Claude Code, Kimi, Qoder, Trae, OpenCode — into a cross-review panel that interrogates your specs and diffs until they converge.
 
-> One model reviewing itself is circular. Two *different vendors* cross-examining your design doc is a polyreview.
+> One model reviewing itself is circular. Two *different vendors* cross-examining your design doc is real review.
 
-<!-- TODO(P2): GIF demo here — two vendors independently catching the same issue, verdict JSON, 3-round convergence timeline -->
+<!-- TODO(P2): GIF demo here — host mode: two vendors independently catch the same issue, host arbitrates, verdict JSON, 3-round convergence -->
 
 ## Why
 
@@ -16,9 +22,19 @@
 ## 30-second start (zero API cost)
 
 ```bash
-pip install -e .   # or: uvx --from . polyreview demo
+# fastest, no clone needed (after PyPI release: `uvx polyreview demo`)
+uvx --from git+https://github.com/b0o0wen/PolyReview.git polyreview demo
+
+# or the classic way
+curl -fsSL https://raw.githubusercontent.com/b0o0wen/PolyReview/main/install.sh | sh
+pip install git+https://github.com/b0o0wen/PolyReview.git
+
 polyreview demo      # mock panel: REVISE → disposition → APPROVE, no keys needed
+polyreview init --host claude   # one command: MCP servers + skill into your host
 ```
+
+> Prerequisite: at least **two CLIs from different vendors** installed & logged in
+> (cross-validation is the whole point — `polyreview doctor` checks what you have).
 
 ## Real usage
 

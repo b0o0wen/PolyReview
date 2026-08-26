@@ -6,3 +6,5 @@ build/
 .venv/
 demo_state/
 review_state/
+.DS_Store
+.pytest_cache/
