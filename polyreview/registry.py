@@ -2,7 +2,7 @@
 
 内置 6 个 agent 适配器（用户只选 agent，不选模型）：
   - codex / claude / kimi：已实测（续聊链路验证通过）
-  - gemini / qwen / aider / qoder：实验性（命令模板来自公开文档，未实测）
+  - gemini / aider / qodercli：实验性（qwen 已语法实测）（命令模板来自公开文档，未实测）
 自定义 reviewer 用 TOML 声明，例如：
 
     [[reviewer]]
@@ -46,10 +46,13 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
               "ANTHROPIC_BASE_URL 会把它路由到其他厂商端点，用 identity 自检核实）。",
     ),
     Adapter(
-        name="qoder", binary="qoder",
-        new_cmd=["qoder", "-p", "{prompt}"],
+        name="qodercli", binary="qodercli",
+        new_cmd=["qodercli", "-p", "{prompt}", "-o", "json"],
+        session_regex=r'"session_id"\s*:\s*"([^"]+)"',
         experimental=True,
-        notes="实验性：本机未安装，headless 参数按公开文档推断，待社区验证。",
+        notes="Qoder CLI（字节）。headless: qodercli -p；-o json 结构化输出含 session_id"
+              "（据 qodercli-mcp 社区项目文档，该包装器即以 qodercli -p 驱动）。"
+              "续聊参数待本机实测后补。命令名是 qodercli（不是 qoder）。",
     ),
     Adapter(
         name="opencode", binary="opencode",
@@ -81,8 +84,9 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
         experimental=False,
         notes="阿里 Qwen Code（fork 自 Gemini CLI）。headless: qwen -p --output-format json；"
               "续聊 --resume <uuid> -p；会话存 ~/.qwen/projects/<cwd>/chats。"
-              "已实测(0.22.2): JSON 在 stdout, session_id/result 结构化返回, rc=0;"
-              "auth 需 --auth-type openai+OPENAI_API_KEY(第三方 provider, OAuth 免费 tier 已停)。",
+              "全链路已实测(0.22.2, 第三方 provider 真实调用): JSON 在 stdout, regex 提取 ok,"
+              "续聊 --resume 同 id 贯穿且记住上轮内容; OAuth 免费 tier 已停(2026-04),"
+              "第三方 provider 需在 ~/.qwen/settings.json 配置(无需 CLI 参数)。",
     ),
     Adapter(
         name="aider", binary="aider",
