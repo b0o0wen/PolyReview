@@ -79,9 +79,11 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
                     "--output-format", "json"],
         session_regex=r'"session_id"\s*:\s*"([0-9a-f-]{36})"',
         experimental=True,
-        notes="阿里 Qwen Code（fork 自 Gemini CLI，语法同源）。headless: qwen -p；"
+        notes="阿里 Qwen Code（fork 自 Gemini CLI）。headless: qwen -p --output-format json；"
               "续聊 --resume <uuid> -p；会话存 ~/.qwen/projects/<cwd>/chats。"
-              "同 gemini：--output-format json 提取 session_id；据官方文档，未本机实测。",
+              "已实测(0.22.2): JSON 在 stdout, session_id/result 结构化返回, rc=0;"
+              "auth 需 --auth-type openai+OPENAI_API_KEY(第三方 provider, OAuth 免费 tier 已停)。",
+        experimental=False,
     ),
     Adapter(
         name="aider", binary="aider",

@@ -62,7 +62,7 @@ polyreview review --artifact review_state/pr/change.diff --mode code
 | claude (Claude Code) | 已实测 | ✅ `--resume` |
 | codex (Codex CLI) | 已实测 | ✅ `exec resume` |
 | gemini (Gemini CLI) | 实验性 | ✅ `--resume`（据文档） |
-| qwen (Qwen Code) | 实验性 | ✅ `--resume`（据文档） |
+| qwen (Qwen Code) | 语法已验证 | ✅ `--resume`（据文档） |
 | kimi (Kimi Code) | 已实测 | ✅ `kimi -r` |
 | opencode | 语法已验证 | ✅ `run -s` |
 | aider | 实验性 | —（设计上无状态） |

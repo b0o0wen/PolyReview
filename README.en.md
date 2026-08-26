@@ -62,7 +62,7 @@ Sorted by prevalence:
 | claude (Claude Code) | tested | ✅ `--resume` |
 | codex (Codex CLI) | tested | ✅ `exec resume` |
 | gemini (Gemini CLI) | experimental | ✅ `--resume` (per docs) |
-| qwen (Qwen Code) | experimental | ✅ `--resume` (per docs) |
+| qwen (Qwen Code) | syntax-verified | ✅ `--resume` (per docs) |
 | kimi (Kimi Code) | tested | ✅ `kimi -r` |
 | opencode | syntax-verified | ✅ `run -s` |
 | aider | experimental | — (stateless by design) |
