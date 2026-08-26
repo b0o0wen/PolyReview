@@ -86,15 +86,53 @@ def _server_cmd(name: str, cfg_path: str | None) -> list[str]:
     return argv
 
 
+def _pick_reviewers(arg_reviewers: str | None, loaded: dict) -> list[str]:
+    """--reviewers 缺省 → 交互多选（含安装状态与实验性提示）；已指定则直接解析。
+
+    多选语法：空格分隔序号（如 "1 3"）；all = 全选；回车 = 接受默认评审团。
+    列表含内置 + config 自定义项；未安装的 CLI 可选但给警告（用户可能计划后续安装）。
+    """
+    installed = {a.name for a, ok in discover_installed() if ok}
+    customs = {c["name"] for c in loaded["reviewers"]}
+    default = loaded["panel"]["reviewers"]
+
+    if arg_reviewers:
+        names = [n.strip() for n in arg_reviewers.split(",") if n.strip()]
+    else:
+        print("\n评审团选哪些 agent？（交叉验证的前提：不同厂商）\n")
+        options = list(REGISTRY) + sorted(customs - set(REGISTRY))
+        for i, n in enumerate(options, 1):
+            a = REGISTRY.get(n)
+            marks = "✅ 已装" if n in installed else ("⬜ 未装" if a else "⚙ 自定义")
+            extra = " ·实验性未实测" if (a and a.experimental) else ""
+            print(f"  {i}. {n:<10} {marks}{extra}")
+        print(f"  回车 = 默认评审团（{', '.join(default)}）")
+        raw = input("选择（空格分隔序号，如 \"1 3\"；all=全选）: ").strip()
+        if not raw:
+            return list(default)
+        if raw.lower() == "all":
+            return options
+        try:
+            names = [options[int(x) - 1] for x in raw.split()]
+        except (ValueError, IndexError):
+            raise SystemExit(f"无效选择 '{raw}'（示例: 1 3 或 all；也可 --reviewers kimi,codex）")
+
+    # 校验（两种入口共用）
+    for n in names:
+        if n not in REGISTRY and n not in customs:
+            raise SystemExit(f"未知评审员 '{n}'（内置: {sorted(REGISTRY)}；自定义进 config.toml）")
+    missing = [n for n in names if n not in installed and n not in customs]
+    if missing:
+        print(f"  ⚠ 未安装: {', '.join(missing)}（可继续，先用已装的；装好 CLI 后即可用）")
+    chosen = [n for n in names if n in installed or n in customs] or list(names)
+    return chosen
+
+
 def cmd_init(args) -> int:
     loaded = config.load(args.config)
-    names = ([n.strip() for n in args.reviewers.split(",")] if args.reviewers
-             else loaded["panel"]["reviewers"])
-    for n in names:
-        if n not in REGISTRY and n not in {c.get("name") for c in loaded["reviewers"]}:
-            raise SystemExit(f"未知评审员 '{n}'（内置: {sorted(REGISTRY)}；自定义进 config.toml）")
-    cfg_path = loaded["source"]          # 有配置文件则让 server 启动时读同一份
     host = _pick_host(args.host)
+    names = _pick_reviewers(args.reviewers, loaded)
+    cfg_path = loaded["source"]          # 有配置文件则让 server 启动时读同一份
     entries = {}
     for n in names:
         entries[f"reviewer-{n}"] = {"type": "stdio", "command": _PY,
@@ -119,13 +157,15 @@ def cmd_init(args) -> int:
         print(f"  已写入 {target}（{', '.join(names)}）")
 
     print("[2/2] Skill")
-    dst = _install_skill(host)
+    try:
+        dst = _install_skill(host)
+    except OSError as exc:
+        dst = None
+        print(f"  ⚠ skill 安装失败（{exc}）；MCP 已可用，可手动复制 {_SKILL_SRC} → {_SKILL_DIRS[host]}")
     if dst:
         print(f"  已安装 → {dst}")
         print("\n完成 ✅  重载 host（Reload Window / 重启会话）后说：\n"
               "  中文: \"多模型交叉评审 <方案/diff>\"   EN: \"cross-review <spec/diff>\"")
-    else:
-        print("  ⚠ skill 源缺失（skills/polyreview-review），跳过；MCP 已可用")
     if cfg_path:
         print(f"\n配置文件（两路径共用）: {cfg_path}")
     return 0
