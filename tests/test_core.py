@@ -174,3 +174,20 @@ class TestInitHostPick(unittest.TestCase):
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("qoder", r.stdout + r.stderr)      # 教学表出现
         self.assertIn("polyreview init", (r.stdout + r.stderr))
+
+
+class TestNewAdapters(unittest.TestCase):
+    def test_gemini_qwen_session_from_json(self):
+        out = '{"session_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "text": "ok"}'
+        for name in ("gemini", "qwen"):
+            a = REGISTRY[name]
+            self.assertEqual(a.extract_session(out, ""), "a1b2c3d4-e5f6-7890-abcd-ef1234567890")
+            self.assertIn("--output-format", " ".join(a.new_cmd))  # 无 json 提不到 session id
+
+    def test_aider_stateless(self):
+        a = REGISTRY["aider"]
+        self.assertIsNone(a.resume_cmd)   # 无续聊: 会话 id 不在 stdout, 每次新会话
+        self.assertIn("--message", a.new_cmd)
+
+    def test_registry_count(self):
+        self.assertEqual(len(REGISTRY), 9)

@@ -58,9 +58,12 @@ Or drive it from your MCP host (Qoder / Claude Code / Cursor / VS Code) — **th
 | kimi (Kimi Code) | tested | ✅ `kimi -r` |
 | codex (Codex CLI) | tested | ✅ `exec resume` |
 | claude (Claude Code) | tested | ✅ `--resume` |
+| opencode | syntax-verified | ✅ `run -s` |
+| gemini (Gemini CLI) | experimental | ✅ `--resume` (per docs) |
+| qwen (Qwen Code) | experimental | ✅ `--resume` (per docs) |
+| aider | experimental | — (stateless by design) |
 | qoder | experimental | — |
 | trae | experimental | — |
-| opencode | experimental | — |
 
 Add any other CLI via `reviewers.toml` (command templates + a session-id regex) — see [registry docs](polyreview/registry.py). PRs welcome for the experimental three; each verified adapter ships with its community's blessing.
 

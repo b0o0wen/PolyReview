@@ -67,6 +67,36 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
               "sessionID 在 JSON 事件流（ses_ 前缀）。模型跟随 opencode providers 配置。"
               "命令语法已实测（1.18.23），评审回复链路待有效 key 验证。",
     ),
+    Adapter(
+        name="gemini", binary="gemini",
+        new_cmd=["gemini", "-p", "{prompt}", "--output-format", "json"],
+        resume_cmd=["gemini", "--resume", "{session}", "-p", "{prompt}",
+                    "--output-format", "json"],
+        session_regex=r'"session_id"\s*:\s*"([0-9a-f-]{36})"',
+        experimental=True,
+        notes="Google Gemini CLI。headless: gemini -p；续聊 --resume <uuid>；"
+              "--output-format json 时 stdout 含 session_id 字段（默认文本输出不含）。"
+              "命令语法据官方文档（v0.4x），未本机实测；回复需从 JSON 提取 text 字段。",
+    ),
+    Adapter(
+        name="qwen", binary="qwen",
+        new_cmd=["qwen", "-p", "{prompt}", "--output-format", "json"],
+        resume_cmd=["qwen", "--resume", "{session}", "-p", "{prompt}",
+                    "--output-format", "json"],
+        session_regex=r'"session_id"\s*:\s*"([0-9a-f-]{36})"',
+        experimental=True,
+        notes="阿里 Qwen Code（fork 自 Gemini CLI，语法同源）。headless: qwen -p；"
+              "续聊 --resume <uuid> -p；会话存 ~/.qwen/projects/<cwd>/chats。"
+              "同 gemini：--output-format json 提取 session_id；据官方文档，未本机实测。",
+    ),
+    Adapter(
+        name="aider", binary="aider",
+        new_cmd=["aider", "--message", "{prompt}", "--yes-always", "--no-git"],
+        experimental=True,
+        notes="Aider（老牌 pair-programmer）。headless: aider --message；"
+              "会话历史在 .aider.chat.history.md（无 stdout 会话 id），故不配续聊"
+              "（每次新会话，请求携带全量上下文，正确性不受影响）。未本机实测。",
+    ),
 ]}
 
 
