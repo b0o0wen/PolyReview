@@ -68,9 +68,9 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
                     "--output-format", "json"],
         session_regex=r'"session_id"\s*:\s*"([0-9a-f-]{36})"',
         experimental=True,
-        notes="Google Gemini CLI。headless: gemini -p；续聊 --resume <uuid>；"
-              "--output-format json 时 stdout 含 session_id 字段（默认文本输出不含）。"
-              "命令语法据官方文档（v0.4x），未本机实测；回复需从 JSON 提取 text 字段。",
+        notes="Google Gemini CLI。headless: gemini -p --output-format json；续聊 --resume <uuid>。"
+              "已实测(0.57.0): JSON 输出在 stderr(stdout 为空), session_id 在 JSON 顶层;"
+              "未登录时也返回 session_id+error(rc=41), 提取链路已验证; 回复链路待有效 key。",
     ),
     Adapter(
         name="qwen", binary="qwen",
@@ -78,12 +78,11 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
         resume_cmd=["qwen", "--resume", "{session}", "-p", "{prompt}",
                     "--output-format", "json"],
         session_regex=r'"session_id"\s*:\s*"([0-9a-f-]{36})"',
-        experimental=True,
+        experimental=False,
         notes="阿里 Qwen Code（fork 自 Gemini CLI）。headless: qwen -p --output-format json；"
               "续聊 --resume <uuid> -p；会话存 ~/.qwen/projects/<cwd>/chats。"
               "已实测(0.22.2): JSON 在 stdout, session_id/result 结构化返回, rc=0;"
               "auth 需 --auth-type openai+OPENAI_API_KEY(第三方 provider, OAuth 免费 tier 已停)。",
-        experimental=False,
     ),
     Adapter(
         name="aider", binary="aider",
