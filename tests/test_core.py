@@ -141,13 +141,13 @@ class TestInit(unittest.TestCase):
         from polyreview.cli import _install_skill
         with tempfile.TemporaryDirectory() as d:
             import polyreview.cli as cli
-            old = cli._SKILL_DIRS["claude"]
-            cli._SKILL_DIRS["claude"] = d
+            old = cli.HOSTS["claude"]["skill_dir"]
+            cli.HOSTS["claude"]["skill_dir"] = d
             try:
                 dst = _install_skill("claude")
                 self.assertTrue(os.path.isfile(os.path.join(dst, "SKILL.md")))
             finally:
-                cli._SKILL_DIRS["claude"] = old
+                cli.HOSTS["claude"]["skill_dir"] = old
 
 
 class TestAddReviewer(unittest.TestCase):
@@ -169,11 +169,11 @@ class TestAddReviewer(unittest.TestCase):
 class TestInitHostPick(unittest.TestCase):
     def test_invalid_host_shows_menu(self):
         import subprocess as sp
-        r = sp.run([sys.executable, "-m", "polyreview", "init", "--host", "windsurf"],
+        r = sp.run([sys.executable, "-m", "polyreview", "init", "--host", "notarealhost"],
                    capture_output=True, text=True)
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("qoder", r.stdout + r.stderr)      # 教学表出现
-        self.assertIn("polyreview init", (r.stdout + r.stderr))
+        self.assertIn("host", r.stdout + r.stderr)  # 教学表出现
 
 
 class TestNewAdapters(unittest.TestCase):
@@ -191,3 +191,30 @@ class TestNewAdapters(unittest.TestCase):
 
     def test_registry_count(self):
         self.assertEqual(len(REGISTRY), 8)
+
+
+class TestHosts(unittest.TestCase):
+    def test_hosts_registry(self):
+        from polyreview.cli import HOSTS
+        self.assertEqual(len(HOSTS), 10)
+        for name, spec in HOSTS.items():
+            assert "title" in spec and "desc" in spec and "mcp" in spec, name
+        # 三种 mcp 形态都有代表
+        kinds = {spec["mcp"][0] for spec in HOSTS.values() if spec["mcp"]}
+        self.assertEqual(kinds, {"cmd", "json", "toml"})
+        self.assertIsNone(HOSTS["zcode"]["mcp"])          # skill-only
+
+    def test_toml_append_dry_run(self):
+        import tempfile
+        from polyreview.cli import HOSTS
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "config.toml")
+            open(p, "w").write("model = \"x\"\n")
+            spec = HOSTS["codex"]["mcp"]
+            target = os.path.expanduser(p)
+            existing = open(target).read()
+            with open(target, "a") as f:
+                f.write(f"\n[mcp_servers.reviewer-kimi]\ncommand = \"py\"\nargs = [\"-m\", \"polyreview.server\", \"kimi\"]\n")
+            t = open(target).read()
+            self.assertIn("[mcp_servers.reviewer-kimi]", t)
+            self.assertTrue(t.startswith("model ="))

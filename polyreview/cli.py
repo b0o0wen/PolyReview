@@ -22,27 +22,48 @@ _PY = sys.executable
 _SKILL_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                           "skills", "polyreview")
 
-# 各 host 的 skill 安装目录（个人全局）与一句话说明（选单/报错用）
-_SKILL_DIRS = {
-    "qoder": "~/.qoder-cn/skills",
-    "claude": "~/.claude/skills",
-    "cursor": "~/.cursor/skills",
-    "vscode": "~/.continue/skills",
-}
-_SKILL_NAMES = {"qoder": "Qoder", "claude": "Claude Code", "cursor": "Cursor", "vscode": "VS Code"}
-_HOST_DESCS = {
-    "qoder": "字节的 AI IDE（QoderCN），在它的会话里用",
-    "claude": "终端里的 Claude Code CLI，`claude` 命令启动",
-    "cursor": "Cursor 编辑器（AI IDE）",
-    "vscode": "Visual Studio Code（含 Continue 等扩展生态）",
+# Host 注册表（数据驱动）：title/desc/skill_dir + mcp 接入方式。
+# mcp 形态：("cmd", 命令模板{server}{argv}) / ("json", 默认路径, 顶层key, None) / ("toml", 路径) / None(skill-only)
+HOSTS = {
+    "claude": {"title": "Claude Code", "desc": "终端里的 Claude Code CLI，`claude` 命令启动",
+               "skill_dir": "~/.claude/skills",
+               "mcp": ("cmd", "claude mcp add --scope user {server} -- {argv}")},
+    "qoder": {"title": "Qoder", "desc": "字节的 AI IDE（QoderCN）",
+              "skill_dir": "~/.qoder-cn/skills",
+              "mcp": ("json", ".vscode/mcp.json", "servers", None)},
+    "cursor": {"title": "Cursor", "desc": "Cursor 编辑器（AI IDE）",
+               "skill_dir": "~/.cursor/skills",
+               "mcp": ("json", ".cursor/mcp.json", "mcpServers", None)},
+    "vscode": {"title": "VS Code", "desc": "Visual Studio Code（Copilot/Continue 生态）",
+               "skill_dir": "~/.continue/skills",
+               "mcp": ("json", ".vscode/mcp.json", "servers", None)},
+    "zcode": {"title": "zcode", "desc": "zcode CLI（.zcode）",
+               "skill_dir": "~/.zcode/skills", "mcp": None,
+               "note": "实测暂无 MCP 注册能力；skill 已验证可用（驱动 CLI 批处理路径）"},
+    "codex": {"title": "Codex CLI", "desc": "Codex 既是评审员也能当 host（agent 会话里用）",
+               "skill_dir": None,
+               "mcp": ("toml", "~/.codex/config.toml", None, None)},
+    "gemini": {"title": "Gemini CLI", "desc": "Gemini CLI 同样可作 host（gemini mcp 官方命令）",
+                "skill_dir": None,
+                "mcp": ("cmd", "gemini mcp add {server} {argv}")},
+    "qwen": {"title": "Qwen Code", "desc": "Qwen Code 同样可作 host（qwen mcp 官方命令）",
+              "skill_dir": None,
+              "mcp": ("cmd", "qwen mcp add {server} {argv}")},
+    "opencode": {"title": "OpenCode", "desc": "OpenCode 同样可作 host（opencode mcp）",
+                  "skill_dir": None, "experimental": True,
+                  "mcp": ("cmd", "opencode mcp add {server} -- {argv}")},
+    "windsurf": {"title": "Windsurf", "desc": "Codeium Windsurf 编辑器",
+                  "skill_dir": None, "experimental": True,
+                  "mcp": ("json", "~/.codeium/windsurf/mcp_config.json", "mcpServers", None)},
 }
 
 
 def _print_host_menu() -> None:
-    """列出四个 host 的说明表（选单/报错教学共用）。"""
+    """列出全部 host 的说明表（选单/报错教学共用）。"""
     print("  host 选哪个？看你在哪个工具里和 AI 对话：\n")
-    for i, (h, desc) in enumerate(_HOST_DESCS.items(), 1):
-        print(f"  {i}. {h:<8} {_SKILL_NAMES[h]} — {desc}")
+    for i, (h, spec) in enumerate(HOSTS.items(), 1):
+        flag = " [实验性]" if spec.get("experimental") else ""
+        print(f"  {i}. {h:<9} {spec['title']} — {spec['desc']}{flag}")
     print()
 
 
@@ -51,27 +72,28 @@ def _pick_host(arg_host: str | None) -> str:
     if arg_host is None:
         print("── PolyReview 一键接入 ──")
         _print_host_menu()
-        choice = input("选择序号（1-4）或直接回车退出: ").strip()
+        choice = input(f"选择序号（1-{len(HOSTS)}）或直接回车退出: ").strip()
         if not choice:
             raise SystemExit("未选择 host，退出（可重跑: polyreview init --host <name>）")
-        hosts = list(_HOST_DESCS)
+        hosts = list(HOSTS)
         try:
             return hosts[int(choice) - 1]
         except (ValueError, IndexError):
             raise SystemExit(f"无效选择 '{choice}'；直接指定: polyreview init --host <{'/'.join(hosts)}>")
-    if arg_host not in _SKILL_DIRS:
+    if arg_host not in HOSTS:
         print(f"✗ 未知 host '{arg_host}'\n")
         _print_host_menu()
-        raise SystemExit(f"用法: polyreview init --host <{'/'.join(_SKILL_DIRS)}>\n"
+        raise SystemExit(f"用法: polyreview init --host <{'/'.join(HOSTS)}>\n"
                          f"或不带 --host 进入选单: polyreview init")
     return arg_host
 
 
 def _install_skill(host: str) -> str | None:
-    """把随包分发的 skill 复制到 host 的技能目录（目标目录名 = polyreview，无重复 review）。"""
-    dst_root = os.path.expanduser(_SKILL_DIRS[host])
-    if not os.path.isdir(_SKILL_SRC):
+    """把随包分发的 skill 复制到 host 的技能目录（仅支持已确认目录约定的 host）。"""
+    skill_dir = HOSTS[host].get("skill_dir")
+    if not skill_dir or not os.path.isdir(_SKILL_SRC):
         return None
+    dst_root = os.path.expanduser(skill_dir)
     dst = os.path.join(dst_root, "polyreview")
     if os.path.isdir(dst):
         shutil.rmtree(dst)
@@ -131,41 +153,66 @@ def _pick_reviewers(arg_reviewers: str | None, loaded: dict) -> list[str]:
 def cmd_init(args) -> int:
     loaded = config.load(args.config)
     host = _pick_host(args.host)
+    h = HOSTS[host]
     names = _pick_reviewers(args.reviewers, loaded)
     cfg_path = loaded["source"]          # 有配置文件则让 server 启动时读同一份
-    entries = {}
-    for n in names:
-        entries[f"reviewer-{n}"] = {"type": "stdio", "command": _PY,
-                                    "args": ["-m", "polyreview.server", n] + ([cfg_path] if cfg_path else [])}
 
-    print(f"── PolyReview 一键安装 → {_SKILL_NAMES[host]} ──\n[1/2] MCP 评审员")
-    if host == "claude":
-        for n in names:
-            print(f"  claude mcp add --scope user reviewer-{n} -- " +
-                  " ".join(_server_cmd(n, cfg_path)))
+    print(f"── PolyReview 一键接入 → {h['title']} ──")
+    if h.get("experimental"):
+        print("（实验性 host：配置格式来自公开文档，未实测）")
+
+    # [1/2] MCP 按接入方式分发
+    mcp = h.get("mcp")
+    print("\n[1/2] MCP 评审员")
+    if mcp is None:
+        print(f"  跳过：{h.get('note', '该 host 暂不支持 MCP 注册')}；skill 将驱动 CLI 批处理路径")
     else:
-        target = args.write or {("qoder"): ".vscode/mcp.json",
-                                "cursor": ".cursor/mcp.json",
-                                "vscode": ".vscode/mcp.json"}[host]
-        key = "servers" if host in ("qoder", "vscode") else "mcpServers"
-        body = {key: entries}
-        if host == "qoder":
-            body = {"servers": entries}   # 工作区 .vscode/mcp.json 形态；用户级套 {"mcp": body}
-        os.makedirs(os.path.dirname(target) or ".", exist_ok=True)
-        with open(target, "w", encoding="utf-8") as f:
-            json.dump(body, f, ensure_ascii=False, indent=2)
-        print(f"  已写入 {target}（{', '.join(names)}）")
+        kind = mcp[0]
+        if kind == "cmd":
+            for n in names:
+                argv = " ".join(_server_cmd(n, cfg_path))
+                print("  " + mcp[1].format(server=f"reviewer-{n}", argv=argv))
+            print("  ↑ 逐条复制执行（官方 CLI 命令，幂等可重复）")
+        elif kind == "json":
+            target = os.path.expanduser(args.write or mcp[1])
+            entries = {}
+            for n in names:
+                entries[f"reviewer-{n}"] = {"type": "stdio", "command": _PY,
+                                            "args": ["-m", "polyreview.server", n] + ([cfg_path] if cfg_path else [])}
+            body = {mcp[2]: entries}
+            os.makedirs(os.path.dirname(target) or ".", exist_ok=True)
+            with open(target, "w", encoding="utf-8") as f:
+                json.dump(body, f, ensure_ascii=False, indent=2)
+            print(f"  已写入 {target}（{', '.join(names)}）")
+        elif kind == "toml":
+            target = os.path.expanduser(args.write or mcp[1])
+            existing = open(target).read() if os.path.exists(target) else ""
+            with open(target, "a", encoding="utf-8") as f:
+                for n in names:
+                    if f"[mcp_servers.reviewer-{n}]" in existing:
+                        print(f"  跳过已存在: reviewer-{n}")
+                        continue
+                    f.write(f"\n[mcp_servers.reviewer-{n}]\ncommand = \"{_PY}\"\n")
+                    f.write("args = " + json.dumps(["-m", "polyreview.server", n]
+                                                    + ([cfg_path] if cfg_path else [])) + "\n")
+            print(f"  已追加到 {target}（{', '.join(names)}）")
 
-    print("[2/2] Skill")
+    # [2/2] Skill
+    print("\n[2/2] Skill")
     try:
         dst = _install_skill(host)
     except OSError as exc:
         dst = None
-        print(f"  ⚠ skill 安装失败（{exc}）；MCP 已可用，可手动复制 {_SKILL_SRC} → {_SKILL_DIRS[host]}")
+        print(f"  ⚠ skill 安装失败（{exc}）；MCP 已可用，可手动复制 {_SKILL_SRC} → {HOSTS[host].get('skill_dir')}")
     if dst:
         print(f"  已安装 → {dst}")
+    elif HOSTS[host].get("skill_dir") is None:
+        print("  该 host 无已验证的 skill 目录约定，跳过（MCP 工具可直接调用）")
+    if dst:
         print("\n完成 ✅  重载 host（Reload Window / 重启会话）后说：\n"
               "  中文: \"多模型交叉评审 <方案/diff>\"   EN: \"cross-review <spec/diff>\"")
+    else:
+        print("\n完成 ✅  重启 host 会话后即可使用 MCP 评审员工具")
     if cfg_path:
         print(f"\n配置文件（两路径共用）: {cfg_path}")
     return 0
@@ -261,7 +308,7 @@ def main() -> None:
 
     pi = sub.add_parser("init", help="一键安装：MCP 配置 + skill（不带 --host 进选单）")
     pi.add_argument("--host", default=None,
-                    help="目标 host：qoder/claude/cursor/vscode（缺省进交互选单）")
+                    help=f"目标 host：{'/'.join(HOSTS)}（缺省进交互选单）")
     pi.add_argument("--reviewers", default=None, help="逗号分隔（默认取 config panel.reviewers）")
     pi.add_argument("--write", default=None, help="MCP 配置写入路径（默认按 host 约定）")
     pi.add_argument("--config", default=None, help="显式配置文件路径")
