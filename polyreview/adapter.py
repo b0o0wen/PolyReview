@@ -28,6 +28,7 @@ class Adapter:
     notes: str = ""
     binary_hints: list[str] = field(default_factory=list)  # 非标准安装路径探测
     reply_json_field: str | None = None  # qodercn/qoder: stdout 是 JSON 元数据, 从该字段提取干净回复
+    reply_ndjson_text: bool = False      # opencode: stdout 是 NDJSON 事件流, 提取 part.type=text 的 part.text
 
     def build(self, prompt: str, session: str | None) -> list[str]:
         tpl = self.resume_cmd if (session and self.resume_cmd) else self.new_cmd
@@ -74,6 +75,17 @@ class Adapter:
                     reply = str(json.loads(out).get(self.reply_json_field) or out)
                 except (json.JSONDecodeError, ValueError):
                     pass  # 非 JSON(如未登录时的错误文本), 保留原文
+            elif self.reply_ndjson_text:
+                parts = []
+                for line in out.splitlines():
+                    try:
+                        ev = json.loads(line)
+                        part = ev.get("part", {})
+                        if part.get("type") == "text" and part.get("text"):
+                            parts.append(part["text"])
+                    except (json.JSONDecodeError, ValueError):
+                        pass
+                reply = "\n".join(parts) if parts else out
             return {"reply": reply, "stderr": err, "session_id": sid,
                     "resumed": sess is not None}
         return {"reply": f"[{self.name}] {last_err}", "stderr": "",

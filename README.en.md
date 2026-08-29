@@ -64,7 +64,7 @@ Sorted by prevalence:
 | gemini (Gemini CLI) | experimental | ✅ `--resume` (per docs) |
 | qwen (Qwen Code) | tested | ✅ `--resume` (fully verified) |
 | kimi (Kimi Code) | tested | ✅ `kimi -r` |
-| opencode | syntax-verified | ✅ `run -s` |
+| opencode | tested | ✅ `run -s` (fully verified, NDJSON) |
 | aider | experimental | — (stateless by design) |
 | qodercn | tested | ✅ `-r` (fully verified) |
 | qoder | experimental | ✅ `-r` (syntax verified, needs login) |

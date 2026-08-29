@@ -64,7 +64,7 @@ polyreview review --artifact review_state/pr/change.diff --mode code
 | gemini (Gemini CLI) | 实验性 | ✅ `--resume`（据文档） |
 | qwen (Qwen Code) | 已实测 | ✅ `--resume`（全链路实测） |
 | kimi (Kimi Code) | 已实测 | ✅ `kimi -r` |
-| opencode | 语法已验证 | ✅ `run -s` |
+| opencode | 已实测 | ✅ `run -s`（全链路实测，NDJSON） |
 | aider | 实验性 | —（设计上无状态） |
 | qodercn | 已实测 | ✅ `-r`（全链路实测） |
 | qoder | 实验性 | ✅ `-r`（语法已验证，待登录） |

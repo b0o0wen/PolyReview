@@ -70,12 +70,13 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
     Adapter(
         name="opencode", binary="opencode",
         binary_hints=["~/.opencode/bin/opencode"],
-        new_cmd=["opencode", "run", "{prompt}"],
-        resume_cmd=["opencode", "run", "-s", "{session}", "{prompt}"],
+        new_cmd=["opencode", "run", "{prompt}", "--format", "json"],
+        resume_cmd=["opencode", "run", "-s", "{session}", "{prompt}", "--format", "json"],
         session_regex=r'"sessionID"\s*:\s*"(ses_[^"]+)"',
-        notes="OpenCode（SST）。headless = opencode run；续聊 -s <id>；"
-              "sessionID 在 JSON 事件流（ses_ 前缀）。模型跟随 opencode providers 配置。"
-              "命令语法已实测（1.18.23），评审回复链路待有效 key 验证。",
+        reply_ndjson_text=True,
+        notes="OpenCode（SST）。headless: opencode run --format json；续聊 -s <id>；"
+              "stdout 是 NDJSON 事件流(sessionID + part.text)；模型跟随 providers 配置。"
+              "全链路已实测(1.18.23, Z.AI/GLM 端点)：回复提取/续聊均通过。",
     ),
     Adapter(
         name="gemini", binary="gemini",
