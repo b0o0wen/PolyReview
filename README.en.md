@@ -66,7 +66,8 @@ Sorted by prevalence:
 | kimi (Kimi Code) | tested | ✅ `kimi -r` |
 | opencode | syntax-verified | ✅ `run -s` |
 | aider | experimental | — (stateless by design) |
-| qodercli | experimental | — (resume TBD) |
+| qodercn | tested | ✅ `-r` (fully verified) |
+| qoder | experimental | ✅ `-r` (syntax verified, needs login) |
 
 Add any other CLI via `reviewers.toml` (command templates + a session-id regex) — see [registry docs](polyreview/registry.py). PRs welcome for the experimental ones; each verified adapter ships with its community's blessing.
 

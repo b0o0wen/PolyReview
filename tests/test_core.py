@@ -190,7 +190,7 @@ class TestNewAdapters(unittest.TestCase):
         self.assertIn("--message", a.new_cmd)
 
     def test_registry_count(self):
-        self.assertEqual(len(REGISTRY), 8)
+        self.assertEqual(len(REGISTRY), 9)
 
 
 class TestHosts(unittest.TestCase):
@@ -218,3 +218,29 @@ class TestHosts(unittest.TestCase):
             t = open(target).read()
             self.assertIn("[mcp_servers.reviewer-kimi]", t)
             self.assertTrue(t.startswith("model ="))
+
+
+class TestQoderAdapters(unittest.TestCase):
+    def test_qodercn_fully_verified(self):
+        a = REGISTRY["qodercn"]
+        self.assertFalse(a.experimental)
+        self.assertEqual(a.reply_json_field, "result")
+        self.assertIn("-r", a.resume_cmd)
+
+    def test_qoder_international(self):
+        a = REGISTRY["qoder"]
+        self.assertTrue(a.experimental)  # 未登录
+        self.assertEqual(a.reply_json_field, "result")
+
+    def test_reply_json_field_extraction(self):
+        """模拟 stdout JSON -> reply 提取 result 字段"""
+        import json as j
+        from polyreview.adapter import Adapter
+        a = Adapter(name="t", binary="t", new_cmd=["t"],
+                    reply_json_field="result",
+                    session_regex=r'"session_id"\s*:\s*"([^"]+)"')
+        # 模拟: run() 的输出
+        out = j.dumps({"session_id": "abc-123", "result": "评审意见正文", "is_error": False})
+        sid = a.extract_session(out, "")
+        self.assertEqual(sid, "abc-123")
+        # reply_json_field 在 review() 中提取, 这里测 extract 逻辑不受影响

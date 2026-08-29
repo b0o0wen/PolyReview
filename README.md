@@ -66,7 +66,8 @@ polyreview review --artifact review_state/pr/change.diff --mode code
 | kimi (Kimi Code) | 已实测 | ✅ `kimi -r` |
 | opencode | 语法已验证 | ✅ `run -s` |
 | aider | 实验性 | —（设计上无状态） |
-| qodercli | 实验性 | —（续聊待验证） |
+| qodercn | 已实测 | ✅ `-r`（全链路实测） |
+| qoder | 实验性 | ✅ `-r`（语法已验证，待登录） |
 
 列表之外的 CLI 同样可以接入：编写一段 `reviewers.toml`（命令模板加一条会话 id 提取正则）即可，详见 [registry 文档](polyreview/registry.py)。欢迎安装了对应 CLI 的用户实测并提交 PR，每一个通过验证的适配器都由社区共同背书。
 

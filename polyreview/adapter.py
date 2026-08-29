@@ -27,6 +27,7 @@ class Adapter:
     experimental: bool = False       # 未实测验证
     notes: str = ""
     binary_hints: list[str] = field(default_factory=list)  # 非标准安装路径探测
+    reply_json_field: str | None = None  # qodercn/qoder: stdout 是 JSON 元数据, 从该字段提取干净回复
 
     def build(self, prompt: str, session: str | None) -> list[str]:
         tpl = self.resume_cmd if (session and self.resume_cmd) else self.new_cmd
@@ -67,7 +68,13 @@ class Adapter:
                 last_err = f"无输出 rc={rc} stderr={err[:300]}"
                 continue  # 续聊失效或瞬时失败 → 下一 attempt
             sid = self.extract_session(out, err)
-            return {"reply": out, "stderr": err, "session_id": sid,
+            reply = out
+            if self.reply_json_field:
+                try:
+                    reply = str(json.loads(out).get(self.reply_json_field) or out)
+                except (json.JSONDecodeError, ValueError):
+                    pass  # 非 JSON(如未登录时的错误文本), 保留原文
+            return {"reply": reply, "stderr": err, "session_id": sid,
                     "resumed": sess is not None}
         return {"reply": f"[{self.name}] {last_err}", "stderr": "",
                 "session_id": "", "resumed": False}

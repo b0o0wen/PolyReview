@@ -46,13 +46,26 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
               "ANTHROPIC_BASE_URL 会把它路由到其他厂商端点，用 identity 自检核实）。",
     ),
     Adapter(
-        name="qodercli", binary="qodercli",
-        new_cmd=["qodercli", "-p", "{prompt}", "-o", "json"],
+        name="qodercn", binary="qodercn",
+        binary_hints=["~/.qoder-cn/entry/qodercn"],
+        new_cmd=["qodercn", "-p", "{prompt}", "-o", "json"],
+        resume_cmd=["qodercn", "-p", "{prompt}", "-r", "{session}", "-o", "json"],
         session_regex=r'"session_id"\s*:\s*"([^"]+)"',
+        reply_json_field="result",
+        notes="Qoder CLI 中国版（字节）。headless: qodercn -p -o json；续聊 -r <id>。"
+              "全链路已实测(1.1.34): stdout JSON 含 session_id + result 字段; 续聊同 id 且记得上轮。"
+              "安装路径 ~/.qoder-cn/entry/qodercn（随 Qoder CN IDE 安装）。",
+    ),
+    Adapter(
+        name="qoder", binary="qoder",
+        new_cmd=["qoder", "-p", "{prompt}", "-o", "json"],
+        resume_cmd=["qoder", "-p", "{prompt}", "-r", "{session}", "-o", "json"],
+        session_regex=r'"session_id"\s*:\s*"([^"]+)"',
+        reply_json_field="result",
         experimental=True,
-        notes="Qoder CLI（字节）。headless: qodercli -p；-o json 结构化输出含 session_id"
-              "（据 qodercli-mcp 社区项目文档，该包装器即以 qodercli -p 驱动）。"
-              "续聊参数待本机实测后补。命令名是 qodercli（不是 qoder）。",
+        notes="Qoder CLI 国际版（npm @qoder-ai/qodercli）。语法与中国版完全相同"
+              "（-p/-o json/-r），已安装(1.1.35)并验证命令模板与 session_id 提取；"
+              "回复链路待登录后验证。",
     ),
     Adapter(
         name="opencode", binary="opencode",
