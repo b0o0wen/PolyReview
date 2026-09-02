@@ -88,3 +88,7 @@ polyreview review --artifact review_state/pr/change.diff --mode code
 Alpha。已在 Qoder 与 Claude Code 两个 host 上以 kimi+codex 日常使用验证；实验性适配器待社区验证。MIT 协议。
 
 English version: [README.en.md](README.en.md)
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=b0o0wen/PolyReview&type=Date)](https://star-history.com/#b0o0wen/PolyReview&Date)

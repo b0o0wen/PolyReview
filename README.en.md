@@ -88,3 +88,7 @@ Full protocol & field notes: [docs/methodology.md](docs/methodology.md) · host 
 Alpha. Proven in daily use on two hosts (Qoder, Claude Code) with kimi+codex; experimental adapters pending community verification. MIT.
 
 中文版：[README.md](README.md)
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=b0o0wen/PolyReview&type=Date)](https://star-history.com/#b0o0wen/PolyReview&Date)
