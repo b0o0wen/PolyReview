@@ -91,4 +91,4 @@ English version: [README.en.md](README.en.md)
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=b0o0wen/PolyReview&type=Date)](https://star-history.com/#b0o0wen/PolyReview&Date)
+![Star History](.github/assets/star-history.svg)

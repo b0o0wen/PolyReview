@@ -1,0 +1,33 @@
+name: Star History Chart
+
+on:
+  schedule:
+    - cron: "0 2 * * *"   # 每天 UTC 02:00 更新（北京时间 10:00）
+  workflow_dispatch:        # 手动触发
+
+permissions:
+  contents: write           # 允许提交生成的图片
+
+jobs:
+  chart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate star history SVG
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pip install requests
+          python .github/scripts/star_chart.py \
+            --repo "${{ github.repository }}" \
+            --token "$GH_TOKEN" \
+            --output .github/assets/star-history.svg
+
+      - name: Commit chart
+        run: |
+          git config user.name "star-chart-bot"
+          git config user.email "actions@github.com"
+          git add .github/assets/star-history.svg
+          git diff --staged --quiet || git commit -m "chore: update star history chart [skip ci]"
+          git push

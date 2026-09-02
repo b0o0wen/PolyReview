@@ -91,4 +91,4 @@ Alpha. Proven in daily use on two hosts (Qoder, Claude Code) with kimi+codex; ex
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=b0o0wen/PolyReview&type=Date)](https://star-history.com/#b0o0wen/PolyReview&Date)
+![Star History](.github/assets/star-history.svg)
