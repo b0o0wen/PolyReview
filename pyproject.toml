@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Multi-agent cross-review panel: let any CLI agents (codex/claude/kimi/...) review your specs & code against each other"
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 keywords = ["mcp", "code-review", "llm", "multi-agent", "cross-review", "cli"]
 classifiers = [
     "Development Status :: 3 - Alpha",

@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/b0o0wen/PolyReview/actions/workflows/ci.yml/badge.svg)](https://github.com/b0o0wen/PolyReview/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](pyproject.toml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](pyproject.toml)
 
 **让你的 AI 编程 agent 互相评审。** 从 Claude Code、Codex、Gemini、Qwen、Kimi、OpenCode、Aider 等 CLI agent 中任选若干组成评审团，对技术方案与代码变更进行多轮独立评审，直至全体通过。
 

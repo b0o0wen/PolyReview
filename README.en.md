@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/b0o0wen/PolyReview/actions/workflows/ci.yml/badge.svg)](https://github.com/b0o0wen/PolyReview/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](pyproject.toml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](pyproject.toml)
 
 **Let your AI coding agents review each other.** Turn any combination of CLI agents — Claude Code, Codex, Gemini, Qwen, Kimi, OpenCode, Aider... — into a cross-review panel that interrogates your specs and diffs until they converge.
 
