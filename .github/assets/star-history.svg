@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="300" viewBox="0 0 800 300">
   <rect width="100%" height="100%" fill="#0d1117"/>
-  <text x="50" y="20" fill="#58a6ff" font-size="14" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">⭐ b0o0wen/PolyReview — 14 stars</text>
-  <polygon points="50,260 50.0,243.6 50.0,227.1 58.2,210.7 63.4,194.3 386.2,177.9 430.8,161.4 467.0,145.0 504.7,128.6 569.5,112.1 642.0,95.7 646.3,79.3 665.3,62.9 696.8,46.4 751.1,30.0 780,260" fill="#1f6feb33"/>
-  <polyline points="50.0,243.6 50.0,227.1 58.2,210.7 63.4,194.3 386.2,177.9 430.8,161.4 467.0,145.0 504.7,128.6 569.5,112.1 642.0,95.7 646.3,79.3 665.3,62.9 696.8,46.4 751.1,30.0" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linejoin="round"/>
+  <text x="50" y="20" fill="#58a6ff" font-size="14" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">⭐ b0o0wen/PolyReview — 19 stars</text>
+  <polygon points="50,260 50.0,247.9 50.0,235.8 55.1,223.7 58.4,211.6 261.0,199.5 289.0,187.4 311.7,175.3 335.4,163.2 376.0,151.1 421.5,138.9 424.2,126.8 436.1,114.7 455.9,102.6 490.0,90.5 509.2,78.4 587.6,66.3 602.5,54.2 609.0,42.1 775.8,30.0 780,260" fill="#1f6feb33"/>
+  <polyline points="50.0,247.9 50.0,235.8 55.1,223.7 58.4,211.6 261.0,199.5 289.0,187.4 311.7,175.3 335.4,163.2 376.0,151.1 421.5,138.9 424.2,126.8 436.1,114.7 455.9,102.6 490.0,90.5 509.2,78.4 587.6,66.3 602.5,54.2 609.0,42.1 775.8,30.0" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linejoin="round"/>
   <text x="50" y="290" fill="#8b949e" font-size="11" font-family="monospace">2026-09-01</text>
-  <text x="720" y="290" fill="#8b949e" font-size="11" font-family="monospace">2026-09-02</text>
+  <text x="720" y="290" fill="#8b949e" font-size="11" font-family="monospace">2026-09-03</text>
 </svg>
