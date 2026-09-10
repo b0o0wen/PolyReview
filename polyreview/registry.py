@@ -121,13 +121,11 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
                     "--profile", "headless-resume", "--resume", "{session}", "{prompt}"],
         session_regex=r"dsh: session:\s*([0-9a-f-]{36})",
         experimental=True,
-        notes="DeepSeek Harness（@deepseek-ai/dsh）。headless: dsh --profile headless '<task>'"
-              "（one-shot；assistant 回复打印到 stdout）。"
+        notes="DeepSeek Harness（@deepseek-ai/dsh）。"
+              "续聊需安装 @b0o0wen/dsh-headless-resume 插件"
+              "（github.com/b0o0wen/dsh-headless-resume，polyreview init --reviewers dsh 时自动装）。"
+              "headless 原生无 --resume（源码确认），插件用 agents.resume() API 实现。"
               "bin 可能未链 PATH（本机实测），直接用 node 调 bin.js 绝对路径。"
-              "续聊：需安装 @polyreview/dsh-headless-resume 插件（dsh-plugin/ 目录），"
-              "headless 原生无 --resume（源码确认），插件用 agents.resume() API 实现；"
-              "安装: dsh --profile headless-resume --from-default-profile headless && "
-              "dsh plugin --profile headless-resume add ./dsh-plugin。"
               "评审回复链路待实测。",
     ),
 ]}

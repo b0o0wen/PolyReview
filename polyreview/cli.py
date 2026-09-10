@@ -108,6 +108,48 @@ def _server_cmd(name: str, cfg_path: str | None) -> list[str]:
     return argv
 
 
+def _install_dsh_plugin() -> None:
+    """dsh 评审员选了时自动安装续聊插件（github.com/b0o0wen/dsh-headless-resume）。"""
+    import subprocess as sp
+    DSH_BIN = "/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/lib/bin.js"
+    print("\n[3/3] dsh 续聊插件")
+    if not os.path.isfile(DSH_BIN):
+        print("  ⚠ dsh 未安装，跳过插件安装")
+        return
+
+    def dsh(*args, **kw):
+        return sp.run(["node", DSH_BIN, *args], capture_output=True, text=True,
+                      timeout=kw.get("timeout", 60), **{k: v for k, v in kw.items() if k != "timeout"})
+
+    # 1. 检查 headless-resume profile 是否已存在
+    check = dsh("--profile", "headless-resume", "--dump-config")
+    profile_ok = check.returncode == 0
+
+    if not profile_ok:
+        print("  初始化 headless-resume profile…")
+        init = dsh("--profile", "headless-resume", "--from-default-profile", "headless", "--dump-config")
+        if init.returncode != 0:
+            print(f"  ⚠ profile 初始化失败: {(init.stderr or init.stdout)[:200]}")
+            print("  可手动: dsh --profile headless-resume --from-default-profile headless")
+            return
+
+    # 2. 安装插件
+    plugin_dir = os.path.expanduser("~/.dsh/profiles/headless-resume")
+    marker = os.path.join(plugin_dir, "node_modules", "@b0o0wen", "dsh-headless-resume")
+    if os.path.isdir(marker):
+        print("  ✓ 已安装 @b0o0wen/dsh-headless-resume")
+        return
+
+    print("  安装 @b0o0wen/dsh-headless-resume…")
+    inst = dsh("plugin", "--profile", "headless-resume", "add",
+               "github:b0o0wen/dsh-headless-resume", timeout=120)
+    if inst.returncode == 0:
+        print("  ✓ 插件安装完成（--resume 续聊能力已启用）")
+    else:
+        print(f"  ⚠ 安装失败: {(inst.stderr or inst.stdout)[:200]}")
+        print("  可手动: dsh plugin --profile headless-resume add github:b0o0wen/dsh-headless-resume")
+
+
 def _pick_reviewers(arg_reviewers: str | None, loaded: dict) -> list[str]:
     """--reviewers 缺省 → 交互多选（含安装状态与实验性提示）；已指定则直接解析。
 
@@ -208,6 +250,10 @@ def cmd_init(args) -> int:
         print(f"  已安装 → {dst}")
     elif HOSTS[host].get("skill_dir") is None:
         print("  该 host 无已验证的 skill 目录约定，跳过（MCP 工具可直接调用）")
+
+    # [3/3] dsh 插件（选了 dsh 评审员时自动安装续聊插件）
+    if "dsh" in names:
+        _install_dsh_plugin()
     if dst:
         print("\n完成 ✅  重载 host（Reload Window / 重启会话）后说：\n"
               "  中文: \"多模型交叉评审 <方案/diff>\"   EN: \"cross-review <spec/diff>\"")
