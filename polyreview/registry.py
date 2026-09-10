@@ -115,14 +115,19 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
         binary_hints=["/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/lib/bin.js"],
         new_cmd=["node",
                  "/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/lib/bin.js",
-                 "--profile", "headless", "{prompt}"],
+                 "--profile", "headless-resume", "{prompt}"],
+        resume_cmd=["node",
+                    "/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/lib/bin.js",
+                    "--profile", "headless-resume", "--resume", "{session}", "{prompt}"],
+        session_regex=r"dsh: session:\s*([0-9a-f-]{36})",
         experimental=True,
         notes="DeepSeek Harness（@deepseek-ai/dsh）。headless: dsh --profile headless '<task>'"
               "（one-shot；assistant 回复打印到 stdout）。"
               "bin 可能未链 PATH（本机实测），直接用 node 调 bin.js 绝对路径。"
-              "续聊限制：headless 源码无 --resume 参数（每次新会话，session-<uuid> 随机生成）；"
-              "tui profile 有 --resume 但为交互式 TUI，不适合非交互 adapter —— "
-              "故设计上无状态（与 aider 同类），每轮请求携带全量上下文。"
+              "续聊：需安装 @polyreview/dsh-headless-resume 插件（dsh-plugin/ 目录），"
+              "headless 原生无 --resume（源码确认），插件用 agents.resume() API 实现；"
+              "安装: dsh --profile headless-resume --from-default-profile headless && "
+              "dsh plugin --profile headless-resume add ./dsh-plugin。"
               "评审回复链路待实测。",
     ),
 ]}
