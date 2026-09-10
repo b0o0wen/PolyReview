@@ -92,4 +92,3 @@ English version: [README.en.md](README.en.md)
 
 ## Star History
 
-![Star History](.github/assets/star-history.svg)

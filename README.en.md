@@ -92,4 +92,3 @@ Alpha. Proven in daily use on two hosts (Qoder, Claude Code) with kimi+codex; ex
 
 ## Star History
 
-![Star History](.github/assets/star-history.svg)
