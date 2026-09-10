@@ -119,14 +119,14 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
         resume_cmd=["node",
                     "/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/lib/bin.js",
                     "--profile", "headless-resume", "--resume", "{session}", "{prompt}"],
-        session_regex=r"dsh: session:\s*([0-9a-f-]{36})",
-        experimental=True,
+        session_regex=r"dsh: session:\s*(session-[0-9a-f-]{36})",
+        experimental=False,
         notes="DeepSeek Harness（@deepseek-ai/dsh）。"
               "续聊需安装 @b0o0wen/dsh-headless-resume 插件"
               "（github.com/b0o0wen/dsh-headless-resume，polyreview init --reviewers dsh 时自动装）。"
-              "headless 原生无 --resume（源码确认），插件用 agents.resume() API 实现。"
+              "session ID 带 session- 前缀（如 session-e29545f2-...），resume 时传完整 ID。"
               "bin 可能未链 PATH（本机实测），直接用 node 调 bin.js 绝对路径。"
-              "评审回复链路待实测。",
+              "全链路已实测：新会话 + --resume 续聊（暗号验证通过）。",
     ),
 ]}
 
