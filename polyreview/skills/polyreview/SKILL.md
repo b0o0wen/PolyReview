@@ -89,5 +89,6 @@ cross-review、多人评审、多人 review（不限对象）、专家团评审�
 ## 注意
 
 - 超时默认 3600s（全仓评审耗时长属正常）；host 侧工具超时需 ≥ 此值
-- MCP 工具不可见 → 提示 Reload；batch 兜底：
-  `polyreview review --artifact <path> --reviewers kimi,codex [--mode code] [--round N]`
+- **只使用 MCP 工具调用评审员**。MCP 工具不可见时提示用户 Reload Window / 重启会话，
+  不要自动降级到 CLI 命令行批处理。仅当用户明确要求"用命令行跑"或"batch 模式"时，
+  才使用 CLI：`polyreview review --artifact <path> --reviewers kimi,codex [--mode code] [--round N]`
