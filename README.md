@@ -90,5 +90,3 @@ Alpha。已在 Qoder 与 Claude Code 两个 host 上以 kimi+codex 日常使用�
 
 English version: [README.en.md](README.en.md)
 
-## Star History
-

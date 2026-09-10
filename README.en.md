@@ -90,5 +90,3 @@ Alpha. Proven in daily use on two hosts (Qoder, Claude Code) with kimi+codex; ex
 
 中文版：[README.md](README.md)
 
-## Star History
-
