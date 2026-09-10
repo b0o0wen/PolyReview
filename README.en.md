@@ -66,6 +66,7 @@ Sorted by prevalence:
 | kimi (Kimi Code) | tested | ✅ `kimi -r` |
 | opencode | tested | ✅ `run -s` (fully verified, NDJSON) |
 | aider | experimental | — (stateless by design) |
+| dsh (DeepSeek Harness) | experimental | — (one-shot headless) |
 | qodercn | tested | ✅ `-r` (fully verified) |
 | qoder | experimental | ✅ `-r` (syntax verified, needs login) |
 

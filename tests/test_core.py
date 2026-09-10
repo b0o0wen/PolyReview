@@ -190,7 +190,7 @@ class TestNewAdapters(unittest.TestCase):
         self.assertIn("--message", a.new_cmd)
 
     def test_registry_count(self):
-        self.assertEqual(len(REGISTRY), 9)
+        self.assertEqual(len(REGISTRY), 10)
 
 
 class TestHosts(unittest.TestCase):

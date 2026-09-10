@@ -110,6 +110,20 @@ REGISTRY: dict[str, Adapter] = {a.name: a for a in [
               "会话历史在 .aider.chat.history.md（无 stdout 会话 id），故不配续聊"
               "（每次新会话，请求携带全量上下文，正确性不受影响）。未本机实测。",
     ),
+    Adapter(
+        name="dsh", binary="dsh",
+        binary_hints=["/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/lib/bin.js"],
+        new_cmd=["node",
+                 "/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/lib/bin.js",
+                 "--profile", "headless", "{prompt}"],
+        experimental=True,
+        notes="DeepSeek Harness（dsh, @deepseek-ai/dsh, 0.1.5-rc）。"
+              "headless: dsh --profile headless '<task>'（one-shot, 无 TUI）。"
+              "全局 npm 装但 bin 可能未链 PATH（本机实测），故直接用 node 调 bin.js。"
+              "首次跑 headless 自动初始化 profile。会话存 ~/.dsh/sessions/，"
+              "headless 无续聊参数（设计上 one-shot），暂不配 resume。"
+              "评审回复链路待实测。",
+    ),
 ]}
 
 
