@@ -4,7 +4,7 @@
 
 ## 1. 验证实验性 adapter（最高优先）
 
-`gemini` / `qwen` / `aider` / `qoder` 的命令模板来自公开文档，未在真实安装上验证（opencode 语法已实测）。
+`gemini` / `aider` / `qodercli` 的命令模板来自公开文档，未在真实安装上验证（kimi/codex/claude/qwen/dsh 已全链路实测）。
 你装了对应 CLI 的话，帮忙跑通并把结论发到 issue（或直接修 `registry.py` 提 PR）：
 
 ```bash
@@ -14,7 +14,7 @@ polyreview init --host <your-host> --reviewers <name>   # 装上
 #   - identity() 是否能返回
 ```
 
-验证通过后我们把该 adapter 移出 experimental（README 表格同步）。
+验证通过后我们把该 adapter 移出 experimental（README 表格同步）。dsh 的续聊插件在 [dsh-headless-resume](https://github.com/b0o0wen/dsh-headless-resume) 独立仓库。
 
 ## 2. 新 adapter
 

@@ -66,7 +66,7 @@ Sorted by prevalence:
 | kimi (Kimi Code) | tested | ✅ `kimi -r` |
 | opencode | tested | ✅ `run -s` (fully verified, NDJSON) |
 | aider | experimental | — (stateless by design) |
-| dsh (DeepSeek Harness) | experimental | — (one-shot headless) |
+| dsh (DeepSeek Harness) | tested | ✅ `--resume` (requires [plugin](https://github.com/b0o0wen/dsh-headless-resume), auto-installed by `init --reviewers dsh`) |
 | qodercn | tested | ✅ `-r` (fully verified) |
 | qoder | experimental | ✅ `-r` (syntax verified, needs login) |
 

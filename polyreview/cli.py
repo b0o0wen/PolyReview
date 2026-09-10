@@ -109,9 +109,18 @@ def _server_cmd(name: str, cfg_path: str | None) -> list[str]:
 
 
 def _install_dsh_plugin() -> None:
-    """dsh 评审员选了时自动安装续聊插件（github.com/b0o0wen/dsh-headless-resume）。"""
+    """dsh 评审员选了时自动安装续聊插件（github.com/b0o0wen/dsh-headless-resume）。
+
+    安装流程：
+    1. 确保 headless-resume profile 存在（基于 headless 模板）
+    2. 修改 profile bundles：只留 [dsh-base, @b0o0wen/dsh-headless-resume]（去掉 dsh-headless）
+    3. 安装插件（幂等，已装跳过）
+    """
+    import json as _json
     import subprocess as sp
+
     DSH_BIN = "/opt/homebrew/lib/node_modules/@deepseek-ai/dsh/lib/bin.js"
+    PROFILE_DIR = os.path.expanduser("~/.dsh/profiles/headless-resume")
     print("\n[3/3] dsh 续聊插件")
     if not os.path.isfile(DSH_BIN):
         print("  ⚠ dsh 未安装，跳过插件安装")
@@ -121,11 +130,8 @@ def _install_dsh_plugin() -> None:
         return sp.run(["node", DSH_BIN, *args], capture_output=True, text=True,
                       timeout=kw.get("timeout", 60), **{k: v for k, v in kw.items() if k != "timeout"})
 
-    # 1. 检查 headless-resume profile 是否已存在
-    check = dsh("--profile", "headless-resume", "--dump-config")
-    profile_ok = check.returncode == 0
-
-    if not profile_ok:
+    # 1. 确保 profile 存在
+    if not os.path.isdir(PROFILE_DIR):
         print("  初始化 headless-resume profile…")
         init = dsh("--profile", "headless-resume", "--from-default-profile", "headless", "--dump-config")
         if init.returncode != 0:
@@ -133,9 +139,21 @@ def _install_dsh_plugin() -> None:
             print("  可手动: dsh --profile headless-resume --from-default-profile headless")
             return
 
-    # 2. 安装插件
-    plugin_dir = os.path.expanduser("~/.dsh/profiles/headless-resume")
-    marker = os.path.join(plugin_dir, "node_modules", "@b0o0wen", "dsh-headless-resume")
+    # 2. 修改 profile bundles：去掉 dsh-headless，只留 base + 我们的插件
+    pkg_path = os.path.join(PROFILE_DIR, "package.json")
+    if os.path.isfile(pkg_path):
+        pkg = _json.load(open(pkg_path))
+        bundles = pkg.get("dsh", {}).get("profile", {}).get("bundles", [])
+        if "@deepseek-ai/dsh-headless" in bundles:
+            bundles.remove("@deepseek-ai/dsh-headless")
+        if "@b0o0wen/dsh-headless-resume" not in bundles:
+            bundles.append("@b0o0wen/dsh-headless-resume")
+        pkg["dsh"]["profile"]["bundles"] = bundles
+        _json.dump(pkg, open(pkg_path, "w"), indent=2)
+        print(f"  ✓ profile bundles: {bundles}")
+
+    # 3. 安装插件（幂等）
+    marker = os.path.join(PROFILE_DIR, "node_modules", "@b0o0wen", "dsh-headless-resume")
     if os.path.isdir(marker):
         print("  ✓ 已安装 @b0o0wen/dsh-headless-resume")
         return
